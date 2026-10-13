@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1a2c54">
+<meta name="description" content="Безкоштовна діагностика шахового рівня для дітей і дорослих: 12 коротких задач, результат за кілька хвилин.">
+<title>Безкоштовна діагностика рівня</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a2c54'/%3E%3Crect x='8' y='8' width='24' height='24' fill='%23cfe5f8'/%3E%3Crect x='32' y='32' width='24' height='24' fill='%23cfe5f8'/%3E%3Crect x='32' y='8' width='24' height='24' fill='%23d6401a'/%3E%3C/svg%3E">
+<style>
+:root {
+  --navy: #1a2c54;
+  --navy-dark: #0f1b36;
+  --accent: #d6401a;
+  --accent-dark: #b23312;
+  --accent-soft: #ffd9cc;
+  --blue-light: #e8f2fc;
+  --blue-mid: #cfe5f8;
+  --blue-sq-light: #e3f0fb;
+  --blue-sq-dark: #8db7e0;
+  --text: #1a2c54;
+  --muted: #4f628a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--blue-light);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.45;
+  min-height: 100vh;
+}
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.wrap {
+  max-width: 512px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+h1 { font-size: 26px; line-height: 1.2; margin: 8px 0 12px; }
+h2 { font-size: 22px; margin: 0 0 8px; }
+p { margin: 0 0 12px; }
+.lead { font-size: 17px; color: var(--muted); }
+.hidden { display: none !important; }
+
+.btn {
+  display: block;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 18px;
+  border: 0;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover, .btn-primary:focus-visible { background: var(--accent-dark); }
+.btn-secondary { background: #fff; color: var(--navy); border: 2px solid var(--navy); }
+.btn-secondary:hover, .btn-secondary:focus-visible { background: var(--blue-mid); }
+.btn + .btn { margin-top: 12px; }
+.btn:focus-visible, .cell:focus-visible, .choice:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.choices { display: flex; gap: 12px; margin: 20px 0; }
+.choice {
+  flex: 1;
+  position: relative;
+  background: #fff;
+  border: 2px solid var(--blue-mid);
+  border-radius: 14px;
+  padding: 16px 8px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice small { display: block; font-weight: 400; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.choice.on { border-color: var(--navy); background: var(--navy); color: #fff; }
+.choice.on small { color: var(--blue-mid); }
+
+.facts { list-style: none; padding: 0; margin: 0 0 20px; color: var(--muted); font-size: 15px; }
+.facts li { padding-left: 22px; position: relative; margin-bottom: 4px; }
+.facts li::before { content: ""; position: absolute; left: 4px; top: 8px; width: 8px; height: 8px; background: var(--accent); border-radius: 2px; }
+.privacy { font-size: 13px; color: var(--muted); margin-top: 20px; text-align: center; }
+
+.progress-row { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; margin-bottom: 8px; }
+.progress { height: 8px; background: var(--blue-mid); border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
+.progress > div { height: 100%; width: 0; background: var(--accent); transition: width 0.3s; }
+.task-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.status { min-height: 24px; color: var(--muted); font-size: 15px; margin-bottom: 10px; }
+
+.board-wrap { position: relative; width: 100%; max-width: 480px; margin: 0 auto; }
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: 100%;
+  border: 3px solid var(--navy);
+  border-radius: 6px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.cell {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  background: var(--blue-sq-light);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cell::before { content: ""; display: block; padding-top: 100%; }
+.cell.dark { background: var(--blue-sq-dark); }
+.cell.last { background: #ffd9a8; }
+.cell.dark.last { background: #f0b878; }
+.cell.sel, .cell.dark.sel { background: #ff8f66; }
+.cell .coord {
+  position: absolute;
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--navy);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.cell .coord.file { right: 3px; bottom: 2px; }
+.cell .coord.rank { left: 3px; top: 2px; }
+.piece {
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc((min(100vw, 512px) - 32px) / 10);
+  line-height: 1;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Apple Symbols", "DejaVu Sans", "Arial Unicode MS", sans-serif;
+  pointer-events: none;
+}
+.piece.w { color: #fff; text-shadow: 1px 0 0 var(--navy), -1px 0 0 var(--navy), 0 1px 0 var(--navy), 0 -1px 0 var(--navy), 1px 1px 0 var(--navy), -1px -1px 0 var(--navy), 1px -1px 0 var(--navy), -1px 1px 0 var(--navy); }
+.piece.b { color: var(--navy-dark); }
+.cell .dot {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 28%; height: 28%;
+  margin: -14% 0 0 -14%;
+  border-radius: 50%;
+  background: var(--navy);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.cell .ring {
+  position: absolute;
+  left: 4%; top: 4%; right: 4%; bottom: 4%;
+  border: 4px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.promo {
+  position: absolute;
+  left: 0; right: 0; top: 50%;
+  transform: translateY(-50%);
+  background: #fff;
+  border: 3px solid var(--navy);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  box-shadow: 0 8px 28px rgba(26, 44, 84, 0.35);
+  z-index: 5;
+}
+.promo p { font-weight: 700; margin-bottom: 8px; }
+.promo-row { display: flex; gap: 8px; }
+.promo-row button {
+  flex: 1;
+  min-height: 60px;
+  background: var(--blue-mid);
+  border: 2px solid var(--navy);
+  border-radius: 10px;
+  font-size: 38px;
+  line-height: 1;
+  font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", "Apple Symbols", "DejaVu Sans", "Arial Unicode MS", sans-serif;
+  color: var(--navy-dark);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.promo-row button.w { color: #fff; text-shadow: 1px 0 0 var(--navy), -1px 0 0 var(--navy), 0 1px 0 var(--navy), 0 -1px 0 var(--navy); }
+.hint-line { text-align: center; font-size: 14px; color: var(--muted); margin-top: 12px; }
+
+.result-card { background: #fff; border-radius: 18px; padding: 24px 18px; margin-bottom: 18px; text-align: center; border-top: 6px solid var(--accent); }
+.result-label { color: var(--muted); font-size: 15px; }
+.result-level { font-size: 38px; font-weight: 800; color: var(--navy); margin: 4px 0 14px; }
+.ladder { display: flex; gap: 4px; margin: 0 0 16px; }
+.ladder span { flex: 1; height: 10px; border-radius: 5px; background: var(--blue-mid); }
+.ladder span.reached { background: var(--navy); }
+.ladder span.current { background: var(--accent); }
+.result-text { font-size: 17px; text-align: left; }
+.score { font-size: 14px; color: var(--muted); }
+.error-box { background: #fff; border: 2px solid var(--accent); border-radius: 12px; padding: 14px; margin-top: 16px; }
+
+@media (min-width: 520px) {
+  h1 { font-size: 30px; }
+  .wrap { padding-top: 32px; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">yaroslavchess.com</div>
+
+<main class="wrap">
+
+  <section id="screen-start">
+    <h1>Безкоштовна діагностика рівня</h1>
+    <p class="lead">12 коротких шахових задач на 5–7 хвилин. Наприкінці ви дізнаєтесь рівень гри та зможете записатися на безкоштовний пробний урок.</p>
+    <p><strong>Хто проходить тест?</strong></p>
+    <div class="choices" role="radiogroup" aria-label="Хто проходить тест">
+      <label class="choice on" id="choice-child">
+        <input type="radio" name="who" value="child" checked>
+        Дитина
+        <small>6–14 років</small>
+      </label>
+      <label class="choice" id="choice-adult">
+        <input type="radio" name="who" value="adult">
+        Дорослий
+        <small>від 15 років</small>
+      </label>
+    </div>
+    <ul class="facts">
+      <li>Задачі підлаштовуються під відповіді: правильно — наступна складніша, помилка — простіша.</li>
+      <li>Одна спроба на кожну задачу, без підказок.</li>
+      <li>Ходи робляться натисканням: спершу на фігуру, потім на клітинку.</li>
+    </ul>
+    <button type="button" class="btn btn-primary" id="btn-start">Почати</button>
+    <button type="button" class="btn btn-secondary" id="btn-novice">Ще не граю</button>
+    <p class="privacy">Тест анонімний: сторінка не збирає й не зберігає жодних персональних даних.</p>
+  </section>
+
+  <section id="screen-task" class="hidden">
+    <div class="progress-row">
+      <span id="task-counter">Задача 1 з 12</span>
+    </div>
+    <div class="progress" aria-hidden="true"><div id="progress-bar"></div></div>
+    <div class="task-title" id="task-title">Знайдіть найкращий хід</div>
+    <div class="status" id="task-status" aria-live="polite"></div>
+    <div class="board-wrap" id="board-wrap">
+      <div class="board" id="board"></div>
+      <div class="promo hidden" id="promo">
+        <p>Оберіть, у яку фігуру перетворити пішака</p>
+        <div class="promo-row" id="promo-row"></div>
+      </div>
+    </div>
+    <p class="hint-line">Натисніть на свою фігуру, потім на клітинку, куди вона піде.</p>
+  </section>
+
+  <section id="screen-result" class="hidden">
+    <div class="result-card">
+      <div class="result-label" id="result-label">Рівень гри</div>
+      <div class="result-level" id="result-level"></div>
+      <div class="ladder" id="result-ladder" aria-hidden="true"></div>
+      <p class="result-text" id="result-text"></p>
+      <p class="score" id="result-score"></p>
+    </div>
+    <a class="btn btn-primary" id="btn-book" href="#" target="_blank" rel="noopener noreferrer">Записатися на безкоштовний пробний урок</a>
+    <button type="button" class="btn btn-secondary" id="btn-restart">Пройти тест ще раз</button>
+  </section>
+
+  <div id="load-error" class="error-box hidden">
+    Не вдалося завантажити шахову бібліотеку. Перевірте інтернет-з'єднання й оновіть сторінку.
+  </div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chess.js@0.10.3/chess.js" integrity="sha384-2D/YG6ZVRMpAIE2PL+zjrxBjvzCSytPKkNUB1Ut84ncxjOuTSrkoO66SGAKjsec3" crossorigin="anonymous"></script>
+<script>
+(function () {
+  'use strict';
+
+  /* ================== НАЛАШТУВАННЯ (див. README.md) ================== */
+
+  // Посилання на запис на пробний урок. ВСТАВТЕ СВОЄ (наприклад, Calendly).
+  var BOOKING_URL = '';
+
+  var TOTAL_TASKS = 12;
+
+  // Стартовий рівень складності задач залежно від того, хто проходить.
+  var START_RATING = { child: 900, adult: 1200 };
+
+  // Наскільки змінюється складність після кожної відповіді (від 1-ї до 12-ї).
+  var STEPS = [300, 250, 200, 150, 125, 100, 100, 100, 100, 100, 100, 100];
+
+  var MIN_RATING = 500;
+  var MAX_RATING = 2000;
+
+  // Рівні: назва й мінімальна оцінка, з якої він починається.
+  var LEVELS = [
+    { name: 'Новачок', min: 0 },
+    { name: 'Початківець', min: 700 },
+    { name: 'Середній', min: 1000 },
+    { name: 'Впевнений', min: 1300 },
+    { name: 'Сильний', min: 1650 }
+  ];
+
+  // Пояснення результату: рівно 2 речення, без шахових термінів.
+  var RESULT_TEXTS = {
+    child: [
+      'Ваша дитина тільки починає знайомство з грою, і це чудова точка старту. На пробному уроці тренер у спокійному темпі покаже перші кроки та допоможе полюбити гру.',
+      'Ваша дитина вже знайома з основами й інколи знаходить вдалі рішення, але не завжди помічає небезпеку наперед. З тренером вона навчиться думати уважніше та послідовніше, і результати швидко зростуть.',
+      'Ваша дитина впевнено орієнтується в основних ідеях гри та часто знаходить правильні рішення. Наступний крок — навчитися складати плани наперед і не робити поспішних помилок.',
+      'Ваша дитина грає добре, бачить непрості рішення й помиляється нечасто. Щоб рости далі, їй потрібні регулярні заняття з тренером і розбір власних ігор.',
+      'Ваша дитина показує дуже сильний рівень і розв’язує навіть складні завдання. На пробному уроці тренер оцінить її сильні сторони та запропонує план для участі в змаганнях.'
+    ],
+    adult: [
+      'Ви тільки починаєте знайомство з грою, і це чудова точка старту. На пробному уроці тренер у зручному темпі покаже перші кроки та допоможе відчути смак гри.',
+      'Ви вже знайомі з основами й інколи знаходите вдалі рішення, але не завжди помічаєте небезпеку наперед. З тренером ви навчитеся думати уважніше та послідовніше, і результати швидко зростуть.',
+      'Ви впевнено орієнтуєтесь в основних ідеях гри та часто знаходите правильні рішення. Наступний крок — навчитися складати плани наперед і не робити поспішних помилок.',
+      'Ви граєте добре, бачите непрості рішення й помиляєтесь нечасто. Щоб рости далі, вам потрібні регулярні заняття з тренером і розбір власних ігор.',
+      'Ви показуєте дуже сильний рівень і розв’язуєте навіть складні завдання. На пробному уроці тренер оцінить ваші сильні сторони та запропонує план для участі в змаганнях.'
+    ]
+  };
+
+  /* ================== ЗАДАЧІ ==================
+     Джерело: відкрита база задач Lichess, https://database.lichess.org
+     (ліцензія CC0). Поля: id — ідентифікатор задачі (lichess.org/training/<id>),
+     rating — рейтинг задачі, fen — позиція ДО першого ходу суперника,
+     moves — правильна послідовність ходів: перший хід робить суперник,
+     далі по черзі розв'язувач і суперник. Задачі не змінювати вручну:
+     див. tools/pick_puzzles.py і README.md. */
+  /* PUZZLES:START */
+var PUZZLES = [
+  { id: "ppRON", rating: 488, fen: "r1b2rk1/1p1qb1pp/1n1pp3/pNP2P2/2P2PQN/1P1BP2P/PB6/1K1R3n b - - 0 19",
+    moves: "h1f2 g4g7" },
+  { id: "VVRYp", rating: 489, fen: "8/r1q2p2/4p2k/4P1pp/4Q3/5P2/6PP/R6K w - - 0 45",
+    moves: "a1a7 c7c1 e4e1 c1e1" },
+  { id: "MHHIn", rating: 504, fen: "r1bqk2r/ppp2pp1/2np3p/2b5/2BNP1n1/2N2Q2/PPP2PPP/R1B2RK1 b kq - 1 9",
+    moves: "c6d4 f3f7" },
+  { id: "qQZrQ", rating: 547, fen: "3r1b1k/1R6/3p1N2/4p3/5p2/8/5KP1/8 b - - 9 50",
+    moves: "d6d5 b7h7" },
+  { id: "VzMiH", rating: 551, fen: "5rk1/p5pp/2p2r2/3p3B/4b2Q/P7/2P3PP/2q1R2K w - - 0 25",
+    moves: "e1c1 f6f1 c1f1 f8f1" },
+  { id: "ijZzN", rating: 561, fen: "8/8/1q6/4P3/1kp1Q3/4K3/8/8 w - - 6 69",
+    moves: "e4d4 b6d4 e3d4 c4c3" },
+  { id: "i42Rf", rating: 596, fen: "8/p1p3pp/1p3p2/2k1p3/P2bP3/1K1P1P1P/3B2P1/8 b - - 6 31",
+    moves: "c7c6 d2b4" },
+  { id: "560NY", rating: 601, fen: "1r2r1k1/Q1pbqppp/1n6/3n4/5N2/1PB3P1/P1P1PPBP/3RK2R w K - 7 17",
+    moves: "f4d5 e7e2" },
+  { id: "GgiAV", rating: 606, fen: "2kr4/pp3pp1/3b3p/Q7/2pP4/5q2/PPB1rP1P/1K1R3R b - - 2 20",
+    moves: "c8b8 a5d8" },
+  { id: "d5HKY", rating: 638, fen: "1k1r1r2/1p2bpp1/p2p3p/1q2nP2/3Q2P1/1BR1B3/PPP4P/5RK1 b - - 10 20",
+    moves: "e7f6 d4a7" },
+  { id: "KM0Nq", rating: 647, fen: "8/8/1P6/4k3/2K2p1p/8/7P/8 b - - 0 48",
+    moves: "f4f3 b6b7 f3f2 b7b8q" },
+  { id: "BV5Bw", rating: 651, fen: "r4r1k/2p1NppR/4b3/8/8/5Q1P/p3RPPK/1q6 b - - 0 24",
+    moves: "h8h7 f3h5" },
+  { id: "pntWf", rating: 694, fen: "2Rnk3/5p1p/p4p2/4n3/P2N3P/5PP1/P5B1/4r1K1 w - - 5 27",
+    moves: "g1f2 e5d3" },
+  { id: "ShNDz", rating: 698, fen: "8/1N5k/4r1p1/8/4n2P/1p3R2/1P3PP1/1K6 w - - 0 32",
+    moves: "f3b3 e4d2 b1c2 d2b3" },
+  { id: "3KGES", rating: 709, fen: "r7/ppp2pk1/7p/8/2pN1P2/2Pbb3/PP4PP/R2R3K w - - 4 25",
+    moves: "g2g3 d3e4 d4f3 e4f3" },
+  { id: "YirgI", rating: 740, fen: "7r/pp3kb1/3p3r/2pP4/3p1Pp1/3P2q1/PP1Q1R1P/4R1KB w - - 0 29",
+    moves: "h2g3 h6h1 g1g2 h8h2" },
+  { id: "HI3EE", rating: 742, fen: "1rb2r1k/1pp4P/p2p4/5pN1/2P5/6R1/PP3P2/2K4R b - - 1 26",
+    moves: "f5f4 g5f7 f8f7 g3g8" },
+  { id: "NQBMO", rating: 745, fen: "7r/1pr1p1n1/p1k1b3/2p4p/2P1NPpP/1P4P1/P1KRB3/3R4 b - - 0 24",
+    moves: "e6f5 d2d6 e7d6 d1d6" },
+  { id: "A77OS", rating: 796, fen: "8/1P2N3/3p1p1k/6pp/3P4/4R1PK/r6P/8 w - - 0 50",
+    moves: "b7b8q g5g4 h3h4 a2h2" },
+  { id: "cVo2S", rating: 800, fen: "r3r3/pp4kp/2n3p1/8/1b3n2/1Q1P4/PPP2PPP/RNB1qRK1 w - - 1 16",
+    moves: "c1f4 e1f1 g1f1 e8e1" },
+  { id: "wj7tk", rating: 810, fen: "4r1k1/1pRb1ppp/6r1/1P5q/4P3/4P2P/3N1QP1/5BK1 b - - 6 27",
+    moves: "d7h3 f2f7 g8h8 f7e8" },
+  { id: "X7iLj", rating: 849, fen: "8/8/8/8/5K1p/7k/P3Q1p1/8 w - - 0 51",
+    moves: "f4f3 g2g1n f3f2 g1e2" },
+  { id: "p1Nld", rating: 852, fen: "8/p2P2k1/7p/6q1/4Q3/6P1/P3p1KP/8 w - - 0 45",
+    moves: "e4d3 e2e1n g2f1 e1d3" },
+  { id: "TRjVo", rating: 860, fen: "rnbqk1nr/pp4b1/2pBpp2/4P1pp/3P4/3B1N1P/P1P1KPP1/1R1QR3 b kq - 0 14",
+    moves: "b8d7 d3g6" },
+  { id: "OK4vR", rating: 899, fen: "r5rk/pp1n1pbp/3pp3/5p2/3P1q2/2P4P/PP5P/R1B1QNK1 w - - 3 20",
+    moves: "c1f4 g7d4 g1h1 g8g1" },
+  { id: "CjZOC", rating: 899, fen: "1rb1B1kr/p3bp1p/4p1pQ/q2nN3/P2P4/8/1P3PPP/R4RK1 b - - 3 20",
+    moves: "e7f8 e8f7" },
+  { id: "LuK8U", rating: 908, fen: "r1q2rk1/pb3p1p/1p2p1p1/2p1P1PN/8/2PBP3/PP4P1/3RK2R b K - 1 19",
+    moves: "b7g2 h5f6 g8g7 h1h7" },
+  { id: "pqXNT", rating: 945, fen: "r1b1k2r/1p3pp1/p2pp3/3Pn2p/P3P3/2N2Pq1/1P4B1/R1BQ1RK1 w kq - 1 16",
+    moves: "d1e1 e5f3 f1f3 g3e1" },
+  { id: "fkka7", rating: 958, fen: "r4rk1/p2R1p1p/1p4p1/1q6/4Q3/2P5/P5PP/5R1K w - - 2 24",
+    moves: "d7f7 b5f1 f7f1 f8f1" },
+  { id: "IC6Hy", rating: 959, fen: "5k1r/ppr1bppp/8/1B3P2/5P2/6P1/P6P/1K1RR3 b - - 6 22",
+    moves: "a7a6 d1d8 e7d8 e1e8" },
+  { id: "CTA6y", rating: 990, fen: "5rk1/5ppp/p1R5/1p1r4/1P1B1n2/P3P3/5PP1/5RK1 w - - 3 25",
+    moves: "c6a6 f4e2 g1h1 d5h5" },
+  { id: "OPjtu", rating: 997, fen: "3r1rk1/p1p1Bp1p/1p2n1p1/4P3/q1P1N2R/7P/6QK/R7 b - - 0 28",
+    moves: "a4a1 e4f6 g8g7 h4h7" },
+  { id: "P9FVe", rating: 1012, fen: "4r1rk/p3P1pp/1p6/2pR3R/2P2p1n/PP3P2/5KP1/8 b - - 2 35",
+    moves: "h4g6 h5h7 h8h7 d5h5" },
+  { id: "EGz5t", rating: 1056, fen: "2b3k1/4qp2/p5p1/1p1pp3/3P1Q2/1P4PB/P3rP1P/R5K1 w - - 0 33",
+    moves: "f4h4 e7h4 g3h4 c8h3" },
+  { id: "LEJWf", rating: 1057, fen: "2r2r2/pb1n1pkp/1pp1pqp1/3pn3/2P1P3/1P1P1NPP/PQ1N1PB1/2R2RK1 w - - 3 16",
+    moves: "f3e1 e5f3 g2f3 f6b2" },
+  { id: "IVQcd", rating: 1061, fen: "rn1qr2k/ppb2Qpp/2p5/2PpN3/n2P1P2/5R2/PP4PP/R1B3K1 b - - 2 17",
+    moves: "e8e7 e5g6 h7g6 f3h3" },
+  { id: "JKcct", rating: 1098, fen: "6rk/pp4rp/6P1/2p2p2/2Pq2nQ/3Pp2R/P2B2PP/5R1K b - - 0 30",
+    moves: "e3e2 h4h7 g7h7 h3h7" },
+  { id: "sWl3y", rating: 1102, fen: "3r1r2/4N1k1/pq5p/3b2p1/6P1/2P1Bp1P/1PQ1pP2/4R2K b - - 3 39",
+    moves: "b6e3 c2g6 g7h8 g6h6" },
+  { id: "25Iig", rating: 1110, fen: "r1b2rk1/ppbn1pp1/5q1p/2p2N2/2pPQ3/5P2/PPB1N1P1/R4R1K b - - 1 19",
+    moves: "d7e5 f5e7 f6e7 e4h7" },
+  { id: "kyDHr", rating: 1143, fen: "3r3r/p3k1pp/1p1p4/2p2R1B/3qP3/1Q3P2/P5PP/5K2 b - - 4 26",
+    moves: "h8f8 f5f7 f8f7 b3f7" },
+  { id: "NBQfG", rating: 1149, fen: "5r2/pbr1b1k1/1p1pBp1N/2p3p1/4P1P1/2B2P2/PPP5/2K4R b - - 4 33",
+    moves: "b7c8 h6f5 g7g6 h1h6" },
+  { id: "Hjl1f", rating: 1153, fen: "5r1r/4kppp/R1b1p3/2qpP1N1/2p5/2P2R2/1Q2K1nP/8 b - - 0 28",
+    moves: "f8b8 f3f7 e7e8 b2b8" },
+  { id: "1DomJ", rating: 1195, fen: "R1kr2nr/2p5/1p1bpp2/1P6/2PP3p/2NQP1qP/6P1/6K1 b - - 0 23",
+    moves: "c8b7 d3e4 c7c6 e4c6" },
+  { id: "gFifN", rating: 1199, fen: "8/p1R5/1p2Nb1k/5pp1/8/1P2BKP1/P4P2/3r2r1 b - - 3 40",
+    moves: "h6h5 c7h7 h5g6 e6f8" },
+  { id: "Ed4IT", rating: 1209, fen: "4kb2/3b4/4p3/2PnB1qp/3Ppp2/4r1P1/1P1NBP2/3QK2R w K - 0 26",
+    moves: "f2e3 g5g3 e1f1 d5e3" },
+  { id: "5Smba", rating: 1245, fen: "3r3k/p5pR/1p1p1p2/2pQ4/2P5/PP2r1P1/2q2PK1/1R6 b - - 0 29",
+    moves: "h8h7 b1h1 h7g6 d5h5" },
+  { id: "FugfL", rating: 1245, fen: "1r4k1/5p2/4p1p1/2PbP3/3P3R/3B2r1/p2K4/7R b - - 5 37",
+    moves: "a2a1q h4h8 g8g7 h1h7" },
+  { id: "kNB4q", rating: 1262, fen: "2r2rk1/3b3p/p3p1R1/1p1pP1N1/3P2P1/q1P1P3/7K/1Qn5 b - - 0 25",
+    moves: "g8h8 g6g8 f8g8 b1h7" },
+  { id: "2Q5HE", rating: 1297, fen: "6k1/5Npp/5n2/1b2N3/1q1P4/p3P1P1/Q4P1P/2r2BK1 b - - 3 28",
+    moves: "b5f1 f7h6 g8f8 a2f7" },
+  { id: "OqAWv", rating: 1302, fen: "2r1kb2/1pq2pp1/p2p4/3BpPPQ/n7/P3B3/1PP2P2/1K1R4 w - - 3 21",
+    moves: "g5g6 c7c2 b1a1 c2b2" },
+  { id: "gwpEI", rating: 1310, fen: "r2q1rk1/ppp3p1/3pB1QB/2b1n2n/4P3/2N5/PPP2PPP/2Kb3R b - - 0 14",
+    moves: "g8h8 h6g7 h5g7 g6h6" },
+  { id: "FDwqM", rating: 1352, fen: "3R2k1/pp6/4N1p1/7p/1n6/6P1/1rr5/K4R2 b - - 1 34",
+    moves: "g8h7 f1f7 h7h6 d8h8" },
+  { id: "AsWIt", rating: 1354, fen: "2r1r1k1/4ppbp/p4np1/qb2B3/8/1PN4P/P2QBPP1/2RR2K1 w - - 0 19",
+    moves: "c3b5 a5d2 d1d2 c8c1" },
+  { id: "LQZ7p", rating: 1355, fen: "8/8/2P2B2/6p1/5p1k/5P1P/7K/5b2 b - - 3 52",
+    moves: "f1h3 f6g5 h4g5 h2h3" },
+  { id: "KTn0I", rating: 1392, fen: "8/R5R1/1P2p2k/4Kp1p/1r6/5P2/1r6/8 b - - 5 55",
+    moves: "b4b5 e5f6 f5f4 g7g6" },
+  { id: "1QLx5", rating: 1397, fen: "5rk1/p4pp1/2pNp1np/q1P1P2Q/3P4/6R1/Pr4PP/5RK1 w - - 2 27",
+    moves: "g3g6 f7g6 f1f8 g8f8 h5f3 f8g8" },
+  { id: "YjzXl", rating: 1411, fen: "r2qkb1r/p2n1pp1/2p1N1p1/2Pn4/8/7P/PPQ2PP1/RNB1R1K1 b kq - 0 15",
+    moves: "f7e6 c2g6 e8e7 e1e6" },
+  { id: "gBwDs", rating: 1454, fen: "r4rk1/1p1b1pp1/p4bqp/2p1Q3/2P5/1P1P1PN1/PB4PP/3R1RK1 w - - 1 24",
+    moves: "e5d6 f6d4 b2d4 g6d6" },
+  { id: "EH3Ey", rating: 1456, fen: "1R6/q3p1kp/4p1p1/2b5/8/2Q4P/5PP1/3r1BK1 b - - 3 38",
+    moves: "g7f7 c3f3 f7g7 f3f8" },
+  { id: "F9fSN", rating: 1461, fen: "3r1r2/2p2kQ1/1p1bpP2/p3q3/8/8/PP3P1P/RB4K1 b - - 0 25",
+    moves: "f7e8 b1g6 f8f7 g7f7" },
+  { id: "Ao0ro", rating: 1494, fen: "r3kbnr/ppq1nQpp/2pp4/4p3/2B1P3/8/PPPP1PPP/R1B2RK1 b kq - 0 11",
+    moves: "e8d7 c4e6 d7d8 f7f8" },
+  { id: "NoZCe", rating: 1507, fen: "1Q6/5p1p/k2p4/P3n3/8/4n1P1/3r4/R1R2K2 w - - 3 46",
+    moves: "f1g1 e5f3 g1h1 d2h2" },
+  { id: "Cn7RT", rating: 1510, fen: "R2r4/2k4p/2p1P3/4Bp1b/2P4q/4N1p1/2K3P1/4R3 b - - 11 39",
+    moves: "c7b6 e1b1 b6c5 a8a5" },
+  { id: "02DwR", rating: 1542, fen: "k7/P7/1K6/1N6/8/4p1p1/3n4/8 b - - 1 59",
+    moves: "d2c4 b6a6 e3e2 b5c7" },
+  { id: "9OVW6", rating: 1542, fen: "5b1k/p6p/4Qp2/8/1p6/5B2/PP1r1KPq/R6R w - - 2 32",
+    moves: "f2e3 f8h6 e3e4 h2f4" },
+  { id: "BEjeU", rating: 1557, fen: "k6r/pp2P3/5P2/2Pp4/3Q2P1/P5Br/2q3KN/R3R3 w - - 1 40",
+    moves: "g2g1 h3g3 g1f1 c2g2" },
+  { id: "8JBCZ", rating: 1594, fen: "r2q2k1/ppp2p2/3b1R1Q/8/8/8/PP3PPP/1b3BK1 b - - 0 19",
+    moves: "b1g6 f6g6 f7g6 f1c4" },
+  { id: "2n9SE", rating: 1595, fen: "Rnkr1b1r/Bpp2Npp/2qp3n/1p2p3/4P3/1P1P4/1PP2PPP/3QK2R b K - 0 13",
+    moves: "h6f7 d1g4 c6d7 a8b8" },
+  { id: "VeCOO", rating: 1609, fen: "3k4/8/2p4R/2r3p1/p5P1/6B1/5PP1/3n2K1 b - - 0 32",
+    moves: "c5a5 h6d6 d8e7 d6d1" },
+  { id: "tLMaN", rating: 1638, fen: "1rbqr3/2n2pk1/p2p2p1/2pPpP2/4P1N1/P6Q/1pP1K3/1R3B1R b - - 1 23",
+    moves: "e8h8 f5f6 d8f6 h3h8" },
+  { id: "ayNs7", rating: 1647, fen: "2kr1b1r/p1pp1ppp/1p6/3P4/1q2Q3/6P1/P4PBP/R1B1K2R w KQ - 0 15",
+    moves: "c1d2 b4e4 g2e4 d8e8 f2f3 f7f5" },
+  { id: "Q2pTm", rating: 1656, fen: "3k3r/np5q/p2p4/3P4/3PNR2/PN6/1P4P1/5RK1 w - - 1 29",
+    moves: "e4d6 h7h2 g1f2 h2f4" },
+  { id: "hDp5E", rating: 1697, fen: "r1bq1rk1/p1pn2b1/1p4Q1/3pp1N1/3P4/2P1P3/PP3PP1/RN2K2R b KQ - 2 14",
+    moves: "f8f6 h1h8 g8h8 g6h7" },
+  { id: "JgPDu", rating: 1700, fen: "r1r2nk1/4nR1p/p3p1pQ/3qP1N1/p7/1PP5/P5PP/R5K1 b - - 0 23",
+    moves: "e7f5 f7f8 c8f8 h6h7" },
+  { id: "Fqyax", rating: 1703, fen: "6k1/2R2p1p/3q2p1/p3n3/Pp6/1B5P/5QPK/8 w - - 0 45",
+    moves: "f2c5 e5f3 h2h1 d6h2" },
+  { id: "F9s2K", rating: 1741, fen: "r1b2rk1/pp1p1p1p/4p2B/2p1nP2/2P1P3/1P4R1/P5PP/7K b - - 3 20",
+    moves: "g8h8 h6g7 h8g8 g7e5" },
+  { id: "ErXGB", rating: 1756, fen: "2b1rk2/6pp/1P2p2N/3p4/2p2Q2/2q5/5PPP/r1R3K1 b - - 5 29",
+    moves: "f8e7 f4f7 e7d6 f7c7" },
+  { id: "XKOka", rating: 1762, fen: "r3q1kr/pp1n3p/2p4B/8/2P2QB1/6P1/5P1P/6K1 b - - 4 34",
+    moves: "e8f7 f4g5 f7g6 g4e6" },
+  { id: "LB7ZL", rating: 1797, fen: "1r4k1/2pQ1p2/p3p1bp/4P1p1/2B1P3/q4PB1/Pr4PP/K2R3R w - - 4 24",
+    moves: "d7d3 b2a2 c4a2 a3b2" },
+  { id: "83CBv", rating: 1804, fen: "r1b1k3/p1Qnqp2/1pp3r1/4p2p/2B1Pp2/1N6/PPP2PPP/3R1RK1 b q - 3 21",
+    moves: "d7f8 d1d8 e7d8 c7f7" },
+  { id: "FyGW4", rating: 1810, fen: "rn2nr1k/ppbq3p/2p3pN/5pB1/3PQ3/2P4P/PP4P1/RN3RK1 b - - 1 23",
+    moves: "f5e4 f1f8 h8g7 f8g8" },
+  { id: "xBkOn", rating: 1838, fen: "r3r3/p1p2p2/1p5R/3p1k2/2bP2N1/2Pn1PK1/P6R/8 b - - 7 33",
+    moves: "e8g8 h2h5 g8g5 h6f6" },
+  { id: "8ow5U", rating: 1842, fen: "r4nk1/pp1br2p/3bP1p1/3PBQ2/2p4q/2P4P/P1B3PK/RN3R2 w - - 2 25",
+    moves: "f5f6 h4f6 f1f6 d6e5" },
+  { id: "JPW0O", rating: 1852, fen: "R7/6kp/3r2p1/p7/4pr2/2P1nB2/PP4PP/4R2K w - - 0 29",
+    moves: "e1e3 d6d1 f3d1 f4f1" },
+  { id: "w4RR7", rating: 1902, fen: "r3kb1r/1b1n1ppp/p2p4/qp2p1B1/6Q1/N1PB4/PP3PPP/2KR3R b kq - 5 15",
+    moves: "h7h6 g4e6 f7e6 d3g6" },
+  { id: "dAcEd", rating: 1906, fen: "rn1q1r1k/ppB1N1pp/2p2p2/2bp3Q/4R3/2N5/PPP3PP/5b1K b - - 1 19",
+    moves: "d8c7 h5h7 h8h7 e4h4" },
+  { id: "VghZc", rating: 1908, fen: "1r3r2/p1p3pp/3p4/1Q1B3b/1P2N3/1R6/k5PP/7K b - - 1 32",
+    moves: "b8b5 e4c3 a2a1 b3b1" },
+  { id: "dpquD", rating: 1939, fen: "4Rrrk/1ppR1Qbp/5N2/p4Pp1/q7/8/2P3PP/6K1 b - - 2 27",
+    moves: "a4b4 f7g8 f8g8 e8g8" },
+  { id: "lALEL", rating: 1957, fen: "5k2/3R3p/2p2ppb/P7/2RB4/2P4P/1r2r1P1/6K1 w - - 2 37",
+    moves: "c4b4 e2e1 g1h2 h6f4" },
+  { id: "4X2zF", rating: 1959, fen: "rn2k1n1/ppp2pp1/8/2b5/6bq/8/PPPPP1BP/RNBQ1K1R w q - 2 10",
+    moves: "d1e1 h4f6 g2f3 g4h3" },
+  { id: "WCYLO", rating: 1991, fen: "1k4r1/ppp2p2/8/3r4/6nK/1P2n1PB/PB5P/4R1R1 w - - 5 26",
+    moves: "h3g4 g8g4 h4h3 d5h5" },
+  { id: "DHMzd", rating: 1991, fen: "8/8/8/1Pkr2nR/P5P1/4K3/8/8 b - - 6 51",
+    moves: "c5b4 b5b6 b4a4 b6b7" },
+  { id: "33rA4", rating: 2007, fen: "2R5/8/3k4/p2p4/8/2PKP3/1r6/r1N2R2 w - - 2 46",
+    moves: "d3d4 b2d2 c1d3 a1f1" },
+];
+  /* PUZZLES:END */
+
+  /* ================== СТАН ================== */
+
+  var state = null;       // стан поточного проходження
+  var timers = [];        // активні таймери (щоб скасувати при перезапуску)
+  var runId = 0;          // номер проходження, щоб відкинути застарілі таймери
+
+  var PIECE_GLYPHS = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
+  var VS_TEXT = '︎'; // змушує показувати символ як текст, а не емодзі
+  var PIECE_NAMES = { k: 'король', q: 'ферзь', r: 'тура', b: 'слон', n: 'кінь', p: 'пішак' };
+  var FILES = 'abcdefgh';
+
+  /* ================== ДОПОМІЖНІ ФУНКЦІЇ ================== */
+
+  function byId(id) { return document.getElementById(id); }
+
+  function later(fn, ms) {
+    var myRun = runId;
+    var id = window.setTimeout(function () {
+      if (myRun === runId) { fn(); }
+    }, ms);
+    timers.push(id);
+  }
+
+  function clearTimers() {
+    var i;
+    for (i = 0; i < timers.length; i++) { window.clearTimeout(timers[i]); }
+    timers = [];
+  }
+
+  function showScreen(name) {
+    var names = ['start', 'task', 'result'];
+    var i;
+    for (i = 0; i < names.length; i++) {
+      byId('screen-' + names[i]).className = (names[i] === name) ? '' : 'hidden';
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function selectedAudience() {
+    var radios = document.getElementsByName('who');
+    var i;
+    for (i = 0; i < radios.length; i++) {
+      if (radios[i].checked) { return radios[i].value; }
+    }
+    return 'child';
+  }
+
+  function clamp(value, lo, hi) {
+    return Math.max(lo, Math.min(hi, value));
+  }
+
+  function uciOf(move) {
+    return move.from + move.to + (move.promotion ? move.promotion : '');
+  }
+
+  function parseUci(uci) {
+    var parsed = { from: uci.substr(0, 2), to: uci.substr(2, 2) };
+    if (uci.length > 4) { parsed.promotion = uci.charAt(4); }
+    return parsed;
+  }
+
+  /* ================== ВИБІР ЗАДАЧІ ================== */
+
+  function pickPuzzle(target) {
+    var best = [];
+    var bestDiff = Infinity;
+    var i, p, diff;
+    for (i = 0; i < PUZZLES.length; i++) {
+      p = PUZZLES[i];
+      if (state.usedIds[p.id]) { continue; }
+      diff = Math.abs(p.rating - target);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        best = [p];
+      } else if (diff === bestDiff) {
+        best.push(p);
+      }
+    }
+    return best[Math.floor(Math.random() * best.length)];
+  }
+
+  /* ================== ПЕРЕБІГ ТЕСТУ ================== */
+
+  function startTest(audience) {
+    runId += 1;
+    clearTimers();
+    state = {
+      audience: audience,
+      step: 0,                    // скільки задач уже пройдено
+      target: START_RATING[audience],
+      usedIds: {},
+      ratings: [],                // рейтинги показаних задач
+      correct: 0,
+      puzzle: null,
+      game: null,
+      idx: 0,
+      userColor: 'w',
+      selected: null,
+      legal: [],
+      lastMove: null,
+      busy: true,
+      pendingPromo: null
+    };
+    showScreen('task');
+    loadPuzzle();
+  }
+
+  function loadPuzzle() {
+    var puzzle = pickPuzzle(state.target);
+    if (!puzzle) {
+      // Нових задач у банку не лишилось (банк замалий): показуємо результат за наявним.
+      showResult(computeLevelIndex());
+      return;
+    }
+    state.puzzle = puzzle;
+    state.usedIds[puzzle.id] = true;
+    state.ratings.push(puzzle.rating);
+    state.moves = puzzle.moves.split(' ');
+    state.game = new Chess(puzzle.fen);
+    // Перший хід у базі робить суперник, тож розв'язувач грає за протилежний бік.
+    state.userColor = (state.game.turn() === 'w') ? 'b' : 'w';
+    state.idx = 0;
+    state.selected = null;
+    state.legal = [];
+    state.lastMove = null;
+    state.busy = true;
+    state.pendingPromo = null;
+
+    byId('task-counter').textContent = 'Задача ' + (state.step + 1) + ' з ' + TOTAL_TASKS;
+    byId('progress-bar').style.width = Math.round((state.step / TOTAL_TASKS) * 100) + '%';
+    byId('task-title').textContent = 'Знайдіть найкращий хід за ' + (state.userColor === 'w' ? 'білих' : 'чорних');
+    byId('promo').className = 'promo hidden';
+    byId('board').setAttribute('data-puzzle', puzzle.id);
+    renderBoard();
+
+    setStatus('Суперник робить хід…');
+    later(function () {
+      applyUci(state.moves[0]);
+      state.idx = 1;
+      state.busy = false;
+      setStatus('Ваш хід. Ви граєте ' + (state.userColor === 'w' ? 'білими' : 'чорними') + '.');
+      renderBoard();
+    }, 800);
+  }
+
+  function setStatus(text) {
+    byId('task-status').textContent = text;
+  }
+
+  function applyUci(uci) {
+    var parsed = parseUci(uci);
+    var result = state.game.move(parsed);
+    if (result) {
+      state.lastMove = { from: result.from, to: result.to };
+    }
+    return result;
+  }
+
+  function finishPuzzle(solved) {
+    state.busy = true;
+    state.selected = null;
+    state.legal = [];
+    renderBoard();
+    if (solved) { state.correct += 1; }
+    // Нейтральне повідомлення: без підказок і без оцінки відповіді.
+    setStatus('Відповідь прийнято.');
+    later(function () { nextStep(solved); }, solved ? 700 : 1000);
+  }
+
+  function nextStep(solved) {
+    var stepSize = STEPS[Math.min(state.step, STEPS.length - 1)];
+    state.target = clamp(state.target + (solved ? stepSize : -stepSize), MIN_RATING, MAX_RATING);
+    state.step += 1;
+    if (state.step >= TOTAL_TASKS) {
+      byId('progress-bar').style.width = '100%';
+      showResult(computeLevelIndex());
+    } else {
+      loadPuzzle();
+    }
+  }
+
+  function computeLevelIndex() {
+    // Оцінка: середнє з рейтингів останніх 4 задач і наступної цілі складності.
+    var recent = state.ratings.slice(-4);
+    var sum = state.target;
+    var i;
+    for (i = 0; i < recent.length; i++) { sum += recent[i]; }
+    var estimate = sum / (recent.length + 1);
+    if (state.correct === 0) { return 0; }
+    var level = 0;
+    for (i = 0; i < LEVELS.length; i++) {
+      if (estimate >= LEVELS[i].min) { level = i; }
+    }
+    return level;
+  }
+
+  /* ================== ДОШКА ================== */
+
+  function squareList() {
+    var list = [];
+    var r, f;
+    var white = (state.userColor === 'w');
+    for (r = 0; r < 8; r++) {
+      for (f = 0; f < 8; f++) {
+        var rank = white ? (8 - r) : (r + 1);
+        var file = white ? f : (7 - f);
+        list.push({ name: FILES.charAt(file) + rank, file: file, rank: rank, row: r, col: f });
+      }
+    }
+    return list;
+  }
+
+  function renderBoard() {
+    var board = byId('board');
+    var squares = squareList();
+    var frag = document.createDocumentFragment();
+    var i, sq, cell, piece, cls, glyph, span, targetInfo;
+
+    for (i = 0; i < squares.length; i++) {
+      sq = squares[i];
+      cls = 'cell';
+      if (((sq.file + sq.rank) % 2) === 1) { cls += ' light'; } else { cls += ' dark'; }
+      if (state.lastMove && (state.lastMove.from === sq.name || state.lastMove.to === sq.name)) { cls += ' last'; }
+      if (state.selected === sq.name) { cls += ' sel'; }
+
+      cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = cls;
+      cell.setAttribute('data-sq', sq.name);
+
+      piece = state.game.get(sq.name);
+      cell.setAttribute('aria-label', squareLabel(sq.name, piece));
+
+      if (sq.col === 0) {
+        span = document.createElement('span');
+        span.className = 'coord rank';
+        span.textContent = String(sq.rank);
+        cell.appendChild(span);
+      }
+      if (sq.row === 7) {
+        span = document.createElement('span');
+        span.className = 'coord file';
+        span.textContent = FILES.charAt(sq.file);
+        cell.appendChild(span);
+      }
+
+      if (piece) {
+        glyph = document.createElement('span');
+        glyph.className = 'piece ' + piece.color;
+        glyph.textContent = PIECE_GLYPHS[piece.type] + VS_TEXT;
+        cell.appendChild(glyph);
+      }
+
+      targetInfo = legalTarget(sq.name);
+      if (targetInfo) {
+        span = document.createElement('span');
+        span.className = piece ? 'ring' : 'dot';
+        cell.appendChild(span);
+      }
+
+      frag.appendChild(cell);
+    }
+    board.innerHTML = '';
+    board.appendChild(frag);
+  }
+
+  function squareLabel(name, piece) {
+    if (!piece) { return name; }
+    return name + ', ' + (piece.color === 'w' ? 'білий ' : 'чорний ') + PIECE_NAMES[piece.type];
+  }
+
+  function legalTarget(name) {
+    var i;
+    for (i = 0; i < state.legal.length; i++) {
+      if (state.legal[i].to === name) { return state.legal[i]; }
+    }
+    return null;
+  }
+
+  function onBoardClick(event) {
+    var node = event.target;
+    var name = null;
+    while (node && node !== byId('board')) {
+      if (node.getAttribute && node.getAttribute('data-sq')) {
+        name = node.getAttribute('data-sq');
+        break;
+      }
+      node = node.parentNode;
+    }
+    if (!name || !state || state.busy || state.pendingPromo) { return; }
+    handleSquare(name);
+  }
+
+  function handleSquare(name) {
+    var piece = state.game.get(name);
+    var move;
+
+    if (state.selected) {
+      if (state.selected === name) {
+        state.selected = null;
+        state.legal = [];
+        renderBoard();
+        return;
+      }
+      move = legalTarget(name);
+      if (move) {
+        if (move.flags.indexOf('p') !== -1) {
+          askPromotion(state.selected, name);
+        } else {
+          playUserMove(state.selected, name, undefined);
+        }
+        return;
+      }
+    }
+
+    if (piece && piece.color === state.userColor) {
+      state.selected = name;
+      state.legal = state.game.moves({ square: name, verbose: true });
+    } else {
+      state.selected = null;
+      state.legal = [];
+    }
+    renderBoard();
+  }
+
+  function askPromotion(from, to) {
+    var order = ['q', 'r', 'b', 'n'];
+    var row = byId('promo-row');
+    var i, btn;
+    state.pendingPromo = { from: from, to: to };
+    row.innerHTML = '';
+    for (i = 0; i < order.length; i++) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = state.userColor;
+      btn.setAttribute('data-promo', order[i]);
+      btn.setAttribute('aria-label', PIECE_NAMES[order[i]]);
+      btn.textContent = PIECE_GLYPHS[order[i]] + VS_TEXT;
+      row.appendChild(btn);
+    }
+    byId('promo').className = 'promo';
+  }
+
+  function onPromoClick(event) {
+    var code = event.target.getAttribute && event.target.getAttribute('data-promo');
+    var pending = state && state.pendingPromo;
+    if (!code || !pending) { return; }
+    state.pendingPromo = null;
+    byId('promo').className = 'promo hidden';
+    playUserMove(pending.from, pending.to, code);
+  }
+
+  function playUserMove(from, to, promotion) {
+    var expected = state.moves[state.idx];
+    var made = state.game.move({ from: from, to: to, promotion: promotion });
+    if (!made) { return; }
+    state.lastMove = { from: made.from, to: made.to };
+    state.selected = null;
+    state.legal = [];
+    state.busy = true;
+
+    // Правильним вважається і будь-який хід, що одразу ставить мат,
+    // навіть якщо база пропонує інший (це так само робить Lichess).
+    var correct = (uciOf(made) === expected) || state.game.in_checkmate();
+    renderBoard();
+
+    if (!correct) {
+      finishPuzzle(false);
+      return;
+    }
+    if (state.game.in_checkmate() || state.idx + 1 >= state.moves.length) {
+      finishPuzzle(true);
+      return;
+    }
+    // Суперник відповідає за послідовністю з бази, далі знову хід розв'язувача.
+    setStatus('Суперник відповідає…');
+    later(function () {
+      applyUci(state.moves[state.idx + 1]);
+      state.idx += 2;
+      state.busy = false;
+      setStatus('Ваш хід.');
+      renderBoard();
+    }, 700);
+  }
+
+  /* ================== РЕЗУЛЬТАТ ================== */
+
+  function showResult(levelIndex) {
+    var audience = state.audience;
+    var i, bar, ladder;
+    byId('result-level').textContent = LEVELS[levelIndex].name;
+    byId('result-text').textContent = RESULT_TEXTS[audience][levelIndex];
+    byId('result-label').textContent = (audience === 'child') ? 'Рівень гри вашої дитини' : 'Ваш рівень гри';
+
+    ladder = byId('result-ladder');
+    ladder.innerHTML = '';
+    for (i = 0; i < LEVELS.length; i++) {
+      bar = document.createElement('span');
+      if (i === levelIndex) { bar.className = 'current'; }
+      else if (i < levelIndex) { bar.className = 'reached'; }
+      ladder.appendChild(bar);
+    }
+
+    if (state.step >= TOTAL_TASKS) {
+      byId('result-score').textContent = 'Правильно розв’язано задач: ' + state.correct + ' з ' + TOTAL_TASKS + '.';
+    } else {
+      byId('result-score').textContent = '';
+    }
+
+    var link = byId('btn-book');
+    link.setAttribute('href', BOOKING_URL ? BOOKING_URL : '#');
+    showScreen('result');
+  }
+
+  function showNovice() {
+    runId += 1;
+    clearTimers();
+    state = { audience: selectedAudience(), step: 0, correct: 0 };
+    showResult(0);
+  }
+
+  function restart() {
+    runId += 1;
+    clearTimers();
+    state = null;
+    showScreen('start');
+  }
+
+  /* ================== ПОДІЇ ================== */
+
+  function onChoiceChange() {
+    var audience = selectedAudience();
+    byId('choice-child').className = 'choice' + (audience === 'child' ? ' on' : '');
+    byId('choice-adult').className = 'choice' + (audience === 'adult' ? ' on' : '');
+  }
+
+  function init() {
+    if (typeof Chess === 'undefined') {
+      byId('load-error').className = 'error-box';
+      byId('btn-start').disabled = true;
+      return;
+    }
+    var radios = document.getElementsByName('who');
+    var i;
+    for (i = 0; i < radios.length; i++) {
+      radios[i].addEventListener('change', onChoiceChange);
+    }
+    byId('btn-start').addEventListener('click', function () { startTest(selectedAudience()); });
+    byId('btn-novice').addEventListener('click', showNovice);
+    byId('btn-restart').addEventListener('click', restart);
+    byId('board').addEventListener('click', onBoardClick);
+    byId('promo-row').addEventListener('click', onPromoClick);
+  }
+
+  init();
+}());
+</script>
+</body>
+</html>
