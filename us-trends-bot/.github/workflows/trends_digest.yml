@@ -1,0 +1,83 @@
+name: US Trends Daily Digest (Gemini API)
+
+on:
+  schedule:
+    # Ціль: 08:00 за Києвом цілий рік. cron у GitHub працює лише в UTC,
+    # а Київ переходить на літній/зимовий час, тому ставимо два запуски,
+    # а крок "gate" пропускає той, що не потрапляє на 08-му годину за Києвом.
+    - cron: '0 5 * * *'   # 08:00 за Києвом улітку (UTC+3)
+    - cron: '0 6 * * *'   # 08:00 за Києвом узимку (UTC+2)
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Тестовий режим: sent.json не оновлювати (чат: TELEGRAM_TEST_CHAT_ID, якщо задано)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+# Два запуски не мають йти паралельно: обидва комітять sent.json
+concurrency:
+  group: us-trends-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    name: Generate and Send Trends Digest
+    runs-on: ubuntu-latest
+    env:
+      # Ручний запуск — за прапорцем test; запуск за розкладом завжди бойовий
+      TEST_MODE: ${{ (github.event_name == 'workflow_dispatch' && inputs.test) && 'true' || 'false' }}
+      EVENT_NAME: ${{ github.event_name }}
+
+    steps:
+      - name: Gate — чи зараз 08:xx за Києвом
+        id: gate
+        run: |
+          kyiv_hour=$(TZ=Europe/Kyiv date +%H)
+          echo "Зараз у Києві година: ${kyiv_hour}, подія: ${EVENT_NAME}"
+          if [ "${EVENT_NAME}" = "schedule" ] && [ "${kyiv_hour}" != "08" ]; then
+            echo "Не 08:xx за Києвом — цей cron-запуск пропускаємо."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Клонування репозиторію
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Налаштування Python
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Встановлення залежностей
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Генерація та відправка дайджесту
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_TEST_CHAT_ID: ${{ secrets.TELEGRAM_TEST_CHAT_ID }}
+          GEMINI_MODEL: ${{ secrets.GEMINI_MODEL || 'gemini-3.5-flash-lite' }}
+        run: python trends_digest.py
+
+      - name: Збереження sent.json
+        if: success() && steps.gate.outputs.run == 'true' && env.TEST_MODE != 'true'
+        run: |
+          if [ -n "$(git status --porcelain sent.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add sent.json
+            git commit -m "chore: update sent.json [skip ci]"
+            git push
+          fi
