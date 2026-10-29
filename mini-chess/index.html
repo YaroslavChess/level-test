@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a2c54">
+<meta name="description" content="Перші шахи для дітей 4–7 років: маленька дошка 5×5, сім рівнів від пішаків до справжньої партії.">
+<title>Міні-шахи</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a2c54'/%3E%3Ccircle cx='32' cy='22' r='9' fill='%23fff'/%3E%3Cpath d='M24 34h16l4 14H20z' fill='%23fff'/%3E%3Crect x='16' y='46' width='32' height='8' rx='3' fill='%23d6401a'/%3E%3C/svg%3E">
+<style>
+:root {
+  --navy: #1a2c54;
+  --navy-dark: #0f1b36;
+  --accent: #d6401a;
+  --accent-dark: #b23312;
+  --blue-light: #e8f2fc;
+  --blue-mid: #cfe5f8;
+  --sq-light: #f4f9ff;
+  --sq-dark: #8fbbe8;
+  --gold: #ffc21a;
+  --text: #1a2c54;
+  --muted: #4f628a;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--blue-light);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.4;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.hidden { display: none !important; }
+svg { display: block; }
+
+/* ---------- Верхня панель ---------- */
+.topbar {
+  background: var(--navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  padding-top: max(8px, env(safe-area-inset-top));
+}
+.topbar h1 { flex: 1; margin: 0; font-size: 20px; letter-spacing: 0.02em; }
+.icon-btn {
+  width: 48px; height: 48px;
+  border: 0; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.icon-btn svg { width: 28px; height: 28px; }
+.icon-btn:hover, .icon-btn:focus-visible { background: rgba(255, 255, 255, 0.24); }
+.icon-btn.on-light { background: #fff; border: 2px solid var(--blue-mid); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 520px; margin: 0 auto; padding: 16px 16px 40px; }
+h2 { font-size: 24px; margin: 4px 0 12px; line-height: 1.2; }
+p { margin: 0 0 12px; }
+.lead { color: var(--muted); font-size: 16px; }
+
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 18px;
+  border: 0; border-radius: 18px;
+  font-size: 20px; font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn svg { width: 30px; height: 30px; flex: none; }
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 4px 0 var(--accent-dark); }
+.btn-primary:hover, .btn-primary:focus-visible { background: var(--accent-dark); }
+.btn-secondary { background: #fff; color: var(--navy); border: 3px solid var(--navy); }
+.btn-secondary:hover, .btn-secondary:focus-visible { background: var(--blue-mid); }
+.btn + .btn { margin-top: 12px; }
+.btn:active { transform: translateY(2px); }
+
+/* ---------- Карта рівнів ---------- */
+.levels { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 8px 0 20px; }
+.tile {
+  position: relative;
+  border: 0; border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 4px 0 var(--blue-mid);
+  padding: 10px 8px 8px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  min-height: 150px;
+}
+.tile:last-child { grid-column: 1 / -1; }
+.tile .num {
+  position: absolute; left: 10px; top: 8px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  font-weight: 800; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tile .pic { width: 84px; height: 84px; display: flex; justify-content: center; }
+.tile .pic svg { width: 84px; height: 84px; }
+.tile .pic svg + svg { margin-left: -34px; }
+.tile .name { font-weight: 800; font-size: 17px; }
+.tile .stars { display: flex; gap: 2px; margin-top: 2px; }
+.tile .stars svg { width: 24px; height: 24px; }
+.tile.locked { background: #dfe8f3; box-shadow: none; }
+.tile.locked .pic, .tile.locked .name, .tile.locked .stars { opacity: 0.35; }
+.tile .lock { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.tile .lock svg { width: 54px; height: 54px; }
+.tile.next { box-shadow: 0 0 0 4px var(--gold), 0 4px 0 var(--blue-mid); animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.03); } }
+.shake { animation: shake 0.4s; }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+
+/* ---------- Зірочки ---------- */
+.star-on { fill: var(--gold); stroke: #b7860b; }
+.star-off { fill: #e2e8f0; stroke: #b9c4d4; }
+
+/* ---------- Підказка рівня ---------- */
+.card { background: #fff; border-radius: 22px; padding: 16px; box-shadow: 0 4px 0 var(--blue-mid); margin-bottom: 16px; }
+.hint-board { width: min(100%, 250px); margin: 0 auto 12px; }
+.hint-text { display: flex; gap: 10px; align-items: center; font-size: 20px; font-weight: 700; margin: 0; }
+.hint-text span { flex: 1; }
+.goal { display: flex; gap: 8px; align-items: center; margin-top: 12px; padding: 10px 12px; border-radius: 14px; background: var(--blue-light); font-weight: 700; }
+.goal svg { width: 28px; height: 28px; flex: none; }
+
+.toggle { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.toggle button {
+  border: 3px solid var(--blue-mid); background: #fff; border-radius: 16px;
+  padding: 12px 14px; text-align: left; font-weight: 700; font-size: 17px; cursor: pointer;
+  display: flex; gap: 10px; align-items: center;
+}
+.toggle button .radio { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--navy); flex: none; }
+.toggle button[aria-checked="true"] { border-color: var(--accent); background: #fff4f0; }
+.toggle button[aria-checked="true"] .radio { background: var(--accent); box-shadow: inset 0 0 0 4px #fff; border-color: var(--accent); }
+
+.opponents { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.opp {
+  border: 0; border-radius: 22px; background: #fff; cursor: pointer;
+  padding: 12px 8px; box-shadow: 0 4px 0 var(--blue-mid);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 19px; font-weight: 800;
+}
+.opp svg { width: 96px; height: 96px; }
+.opp small { font-weight: 600; font-size: 14px; color: var(--muted); }
+.opp:hover, .opp:focus-visible { box-shadow: 0 0 0 4px var(--accent), 0 4px 0 var(--blue-mid); }
+
+/* ---------- Дошка ---------- */
+.board {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 0 0 6px var(--navy), 0 10px 24px rgba(26, 44, 84, 0.25);
+}
+.board .sq {
+  position: absolute; width: 20%; height: 20%;
+  border: 0; padding: 0; margin: 0;
+  background: var(--sq-light);
+  cursor: pointer;
+}
+.board .sq.dark { background: var(--sq-dark); }
+.board .sq.last { box-shadow: inset 0 0 0 4px rgba(255, 194, 26, 0.95); }
+.board .sq.sel { background-image: linear-gradient(rgba(255, 194, 26, 0.75), rgba(255, 194, 26, 0.75)); }
+.board .sq.check { background-image: radial-gradient(circle, rgba(214, 64, 26, 0.95) 0, rgba(214, 64, 26, 0.55) 45%, rgba(214, 64, 26, 0) 72%); }
+.board .sq .dot { position: absolute; inset: 0; display: none; z-index: 3; pointer-events: none; }
+.board .sq .dot::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  width: 34%; height: 34%; margin: -17% 0 0 -17%;
+  border-radius: 50%; background: var(--accent); opacity: 0.85;
+  box-shadow: 0 0 0 3px #fff;
+}
+.board .sq.mv .dot, .board .sq.cap .dot { display: block; }
+.board .sq.cap .dot::after {
+  width: 86%; height: 86%; margin: -43% 0 0 -43%;
+  background: transparent; border: 6px solid var(--accent); box-shadow: none; opacity: 0.9;
+}
+.board .sq.foe .dot::after { background: var(--navy); opacity: 0.4; box-shadow: none; }
+.board .sq.foe.cap .dot::after { background: transparent; border-color: var(--navy); opacity: 0.45; }
+.board .pieces { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.board .pc-wrap {
+  position: absolute; left: 0; top: 0; width: 20%; height: 20%;
+  transition: transform 0.3s ease-in-out;
+  will-change: transform;
+}
+.board .pieces.no-anim .pc-wrap { transition: none; }
+.pc-wrap .pc-in { width: 100%; height: 100%; padding: 5%; transition: transform 0.2s; }
+.pc-wrap .pc-in svg { width: 100%; height: 100%; filter: drop-shadow(0 3px 0 rgba(15, 27, 54, 0.25)); }
+.pc-wrap.sel .pc-in { transform: scale(1.1); }
+.pc-wrap.appear .pc-in { animation: appear 0.3s ease-out; }
+.pc-wrap.captured { transition: opacity 0.3s, transform 0.3s; opacity: 0; }
+.pc-wrap.captured .pc-in { transform: scale(0.3) rotate(25deg); }
+.pc-wrap.jump .pc-in { animation: jump 0.3s ease-in-out; }
+.pc-wrap.escaping { transition: transform 0.6s ease-in, opacity 0.6s ease-in; opacity: 0; }
+.pc-wrap.glow .pc-in { animation: glow 1s ease-in-out; }
+.pc-wrap.morph .pc-in { animation: morph 0.6s ease-in-out; }
+@keyframes appear { from { transform: scale(0.2); opacity: 0; } }
+@keyframes jump { 50% { transform: scale(1.35) translateY(-10%); } }
+@keyframes glow {
+  0% { transform: scale(1); filter: none; }
+  35% { transform: scale(1.45) translateY(-12%); filter: drop-shadow(0 0 10px #ffc21a) drop-shadow(0 0 18px #fff3b0); }
+  70% { transform: scale(1.3) rotate(-8deg); filter: drop-shadow(0 0 14px #ffc21a); }
+  100% { transform: scale(1); filter: none; }
+}
+@keyframes morph { 0% { transform: scale(1) rotateY(0); } 50% { transform: scale(1.3) rotateY(90deg); } 100% { transform: scale(1) rotateY(0); } }
+
+/* Фігури: обведення товще за тіло, тож деталі зливаються в один силует. */
+.pc .o { stroke-width: 7; stroke-linejoin: round; }
+.pc .d { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.pc .e { stroke: none; }
+.pc-w .o { fill: #1a2c54; stroke: #1a2c54; }
+.pc-w .f { fill: url(#grad-w); }
+.pc-w .d { stroke: #1a2c54; }
+.pc-w .e { fill: #1a2c54; }
+.pc-b .o { fill: #0b1430; stroke: #0b1430; }
+.pc-b .f { fill: url(#grad-b); }
+.pc-b .d { stroke: #cfe5f8; }
+.pc-b .e { fill: #cfe5f8; }
+
+/* ---------- Екран гри ---------- */
+.status {
+  display: flex; align-items: center; gap: 10px;
+  background: #fff; border-radius: 18px; padding: 6px 12px 6px 6px; margin-bottom: 10px;
+  min-height: 60px; font-size: 18px; font-weight: 800;
+  box-shadow: 0 3px 0 var(--blue-mid);
+}
+.status .ava { width: 48px; height: 48px; flex: none; }
+.status .ava svg { width: 48px; height: 48px; }
+.status .txt { flex: 1; }
+.status.my-turn { box-shadow: 0 0 0 3px var(--accent), 0 3px 0 var(--blue-mid); }
+.status .thinking { display: inline-flex; gap: 4px; margin-left: 6px; }
+.status .thinking i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); animation: blink 1s infinite; }
+.status .thinking i:nth-child(2) { animation-delay: 0.2s; }
+.status .thinking i:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 50% { opacity: 0.2; } }
+.goal-line { font-size: 14px; color: var(--muted); font-weight: 700; margin: 0 0 8px; text-align: center; }
+.tray {
+  display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+  min-height: 40px; padding: 4px 8px; margin: 8px 0;
+  font-size: 14px; font-weight: 700; color: var(--muted);
+}
+.tray .lbl { margin-right: 6px; }
+.tray svg { width: 32px; height: 32px; }
+.tray .esc { display: inline-flex; }
+.tray .esc svg { opacity: 0.55; }
+.board-box { padding: 6px; }
+.room {
+  background: var(--navy); color: #fff; border-radius: 16px; padding: 10px 14px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 700;
+}
+.room b { font-size: 28px; letter-spacing: 0.15em; }
+.room .net { font-size: 14px; font-weight: 600; opacity: 0.9; text-align: right; }
+.game-actions { display: flex; gap: 12px; margin-top: 16px; }
+.game-actions .btn { margin: 0; }
+
+/* ---------- Накладки ---------- */
+.overlay {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(15, 27, 54, 0.6);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+}
+.dialog {
+  background: #fff; border-radius: 26px; padding: 22px 18px 18px;
+  width: 100%; max-width: 400px; text-align: center;
+  animation: pop 0.35s ease-out;
+  max-height: 100%; overflow-y: auto;
+}
+@keyframes pop { from { transform: scale(0.6); opacity: 0; } }
+.dialog h2 { font-size: 30px; margin: 6px 0; }
+.dialog .big svg { width: 110px; height: 110px; margin: 0 auto; }
+.dialog .reason { color: var(--muted); font-size: 17px; font-weight: 600; }
+.result-stars { display: flex; justify-content: center; gap: 8px; margin: 8px 0 16px; }
+.result-stars svg { width: 58px; height: 58px; }
+.result-stars .star-on { animation: starpop 0.5s ease-out both; }
+.result-stars svg:nth-child(2) .star-on { animation-delay: 0.25s; }
+.result-stars svg:nth-child(3) .star-on { animation-delay: 0.5s; }
+@keyframes starpop { 0% { transform: scale(0); } 70% { transform: scale(1.3); } 100% { transform: scale(1); } }
+.result-stars path { transform-origin: 12px 12px; }
+
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin: 12px 0 16px; }
+.pin-dots i { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--navy); }
+.pin-dots i.on { background: var(--navy); }
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 300px; margin: 0 auto; }
+.keypad button {
+  min-height: 62px; border: 0; border-radius: 16px; background: #fff;
+  font-size: 28px; font-weight: 800; cursor: pointer; box-shadow: 0 3px 0 var(--blue-mid);
+}
+.keypad button:active { transform: translateY(2px); }
+.keypad svg { width: 30px; height: 30px; margin: 0 auto; }
+.code-input { font-size: 40px; font-weight: 800; letter-spacing: 0.3em; text-align: center; min-height: 56px; margin: 4px 0 12px; }
+.msg { padding: 12px 14px; border-radius: 14px; background: #fff4f0; border: 2px solid var(--accent); font-weight: 600; margin: 12px 0; }
+
+.teacher-levels { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 12px; }
+.teacher-levels button {
+  border: 3px solid var(--blue-mid); background: #fff; border-radius: 12px; min-height: 48px;
+  font-weight: 800; font-size: 18px; cursor: pointer; padding: 0;
+}
+.teacher-levels button[aria-checked="true"] { border-color: var(--accent); background: var(--accent); color: #fff; }
+.section-title { font-size: 18px; font-weight: 800; margin: 20px 0 8px; }
+
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tile.next { animation: none; }
+  .board .pc-wrap { transition-duration: 0.15s; }
+}
+</style>
+</head>
+<body>
+
+<!-- Градієнти для фігур (спільні для всіх SVG на сторінці). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="grad-w" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#ffe08a"/>
+    </linearGradient>
+    <linearGradient id="grad-b" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5b7fc9"/>
+      <stop offset="1" stop-color="#1a2c54"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <button type="button" class="icon-btn hidden" id="btn-home" aria-label="Додому"></button>
+  <h1 id="top-title">Міні-шахи</h1>
+  <button type="button" class="icon-btn" id="btn-sound" aria-label="Звук"></button>
+  <button type="button" class="icon-btn" id="btn-lock" aria-label="Для вчителя"></button>
+</header>
+
+<main class="wrap">
+
+  <!-- Карта рівнів -->
+  <section id="scr-map">
+    <h2>Обери рівень</h2>
+    <div class="levels" id="levels"></div>
+    <button type="button" class="btn btn-secondary" id="btn-join"></button>
+  </section>
+
+  <!-- Підказка рівня й вибір суперника -->
+  <section id="scr-intro" class="hidden">
+    <h2 id="intro-title"></h2>
+    <div class="card">
+      <div class="hint-board"><div class="board" id="hint-board"></div></div>
+      <p class="hint-text"><span id="hint-text"></span><button type="button" class="icon-btn on-light hidden" id="btn-speak" aria-label="Прочитати вголос"></button></p>
+      <div class="goal" id="intro-goal"></div>
+    </div>
+    <div class="toggle hidden" id="rules-toggle" role="radiogroup" aria-label="Правила">
+      <button type="button" role="radio" data-real="0"><span class="radio"></span>Для малят: перемога, коли з’їв короля</button>
+      <button type="button" role="radio" data-real="1"><span class="radio"></span>Справжні правила: мат</button>
+    </div>
+    <div class="opponents">
+      <button type="button" class="opp" id="btn-bear"></button>
+      <button type="button" class="opp" id="btn-fox"></button>
+    </div>
+  </section>
+
+  <!-- Гра -->
+  <section id="scr-game" class="hidden">
+    <div class="room hidden" id="room">
+      <span>Кімната <b id="room-code"></b></span>
+      <span class="net" id="net-status"></span>
+    </div>
+    <div class="status" id="status"><span class="ava" id="status-ava"></span><span class="txt" id="status-txt"></span></div>
+    <p class="goal-line" id="goal-line"></p>
+    <div class="tray" id="tray-top"></div>
+    <div class="board-box"><div class="board" id="board"></div></div>
+    <div class="tray" id="tray-bottom"></div>
+    <div class="game-actions">
+      <button type="button" class="btn btn-secondary" id="btn-restart"></button>
+    </div>
+  </section>
+
+  <!-- Учень: код кімнати -->
+  <section id="scr-join" class="hidden">
+    <h2>Грати з вчителем</h2>
+    <p class="lead">Введи код, який скаже вчитель.</p>
+    <div class="code-input" id="join-code" aria-live="polite"></div>
+    <div class="keypad" id="join-pad"></div>
+    <div class="msg hidden" id="join-msg"></div>
+  </section>
+
+  <!-- Панель вчителя -->
+  <section id="scr-teacher" class="hidden">
+    <h2>Для вчителя</h2>
+    <button type="button" class="btn btn-secondary" id="btn-unlock-all"></button>
+    <button type="button" class="btn btn-secondary" id="btn-reset">Скинути зірочки</button>
+    <div class="section-title">Онлайн-урок</div>
+    <p class="lead">Оберіть рівень і створіть кімнату. Учень грає білими й ходить першим, ви — чорними.</p>
+    <div class="teacher-levels" id="teacher-levels" role="radiogroup" aria-label="Рівень"></div>
+    <div class="toggle hidden" id="teacher-rules" role="radiogroup" aria-label="Правила">
+      <button type="button" role="radio" data-real="0"><span class="radio"></span>Для малят: перемога, коли з’їв короля</button>
+      <button type="button" role="radio" data-real="1"><span class="radio"></span>Справжні правила: мат</button>
+    </div>
+    <button type="button" class="btn btn-primary" id="btn-create-room">Створити кімнату</button>
+    <div class="msg hidden" id="teacher-msg"></div>
+  </section>
+
+</main>
+
+<!-- Результат -->
+<div class="overlay hidden" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title">
+  <div class="dialog">
+    <div class="big" id="result-icon"></div>
+    <h2 id="result-title"></h2>
+    <p class="reason" id="result-reason"></p>
+    <div class="result-stars" id="result-stars"></div>
+    <div id="result-actions"></div>
+  </div>
+</div>
+
+<!-- Пароль вчителя -->
+<div class="overlay hidden" id="pin" role="dialog" aria-modal="true" aria-labelledby="pin-title">
+  <div class="dialog" id="pin-dialog">
+    <h2 id="pin-title">Для вчителя</h2>
+    <p class="reason">Введіть пароль</p>
+    <div class="pin-dots" id="pin-dots"><i></i><i></i><i></i><i></i></div>
+    <div class="keypad" id="pin-pad"></div>
+    <button type="button" class="btn btn-secondary" id="pin-cancel" style="margin-top:14px">Скасувати</button>
+  </div>
+</div>
+
+<canvas id="confetti" class="hidden"></canvas>
+
+<noscript><div class="wrap"><p class="msg">Для гри потрібно увімкнути JavaScript.</p></div></noscript>
+
+<script>
+/* ENGINE:START */
+var MiniChess = (function () {
+  'use strict';
+
+  // Дошка 5×5. Клітинка = r * 5 + f, де f = 0..4 (a..e), r = 0..4 (ряд 1..5).
+  // Білі (дитина) — знизу, ходять першими й рухаються вгору.
+  var N = 5;
+  var FILES = 'abcde';
+  var VALUES = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+  var QUIET_LIMIT = 40;  // півходів без взяття й ходу пішака → нічия
+  var WIN = 10000;
+
+  // promo: 'win' — пішак на останньому ряду виграє; 'queen' — стає ферзем;
+  // 'escape' — пішак «утікає» з дошки, а перемагає той, у кого більше: з'їдених пішаків
+  // чи тих, що втекли (за правилом «не пропусти жодного» фігура проти 4 пішаків на 5×5
+  // програє при точній грі суперника). Стартові клітинки фігур 2–5 підібрано повним
+  // перебором так, щоб фігура вигравала при правильній грі.
+  // king: перемога, коли з'їли короля; mate: справжні правила (шах, мат, пат).
+  var LEVELS = [
+    { setup: '5/ppppp/5/PPPPP/5', piece: 'p', rules: { promo: 'win' } },
+    { setup: '5/pp1pp/5/5/2R2', piece: 'r', rules: { promo: 'escape' } },
+    { setup: '5/pp1pp/5/1B3/5', piece: 'b', rules: { promo: 'escape' } },
+    { setup: '5/pp1pp/5/3N1/5', piece: 'n', rules: { promo: 'escape' } },
+    { setup: '5/ppppp/5/5/2Q2', piece: 'q', rules: { promo: 'escape' } },
+    { setup: '2k2/ppppp/5/PPPPP/2K2', piece: 'k', rules: { promo: 'win', king: true } },
+    { setup: 'rnbqk/ppppp/5/PPPPP/RNBQK', piece: 'all', rules: { promo: 'queen', king: true } }
+  ];
+  var REAL_RULES = { promo: 'queen', mate: true };
+
+  var DIRS = {
+    r: [[1, 0], [-1, 0], [0, 1], [0, -1]],
+    b: [[1, 1], [1, -1], [-1, 1], [-1, -1]],
+    n: [[1, 2], [2, 1], [2, -1], [1, -2], [-1, -2], [-2, -1], [-2, 1], [-1, 2]]
+  };
+  DIRS.q = DIRS.r.concat(DIRS.b);
+  DIRS.k = DIRS.q;
+
+  function other(c) { return c === 'w' ? 'b' : 'w'; }
+  function fileOf(sq) { return sq % N; }
+  function rankOf(sq) { return (sq - sq % N) / N; }
+  function sqName(sq) { return FILES.charAt(fileOf(sq)) + (rankOf(sq) + 1); }
+  function sqIndex(name) { return (parseInt(name.charAt(1), 10) - 1) * N + FILES.indexOf(name.charAt(0)); }
+
+  // Розстановка в стилі FEN: ряди від 5-го до 1-го через «/», цифра — порожні клітинки.
+  function parse(setup) {
+    var board = [], rows = setup.split('/'), id = 1, i, r, f, ch;
+    for (i = 0; i < N * N; i++) board.push(null);
+    for (i = 0; i < N; i++) {
+      r = N - 1 - i;
+      f = 0;
+      for (var j = 0; j < rows[i].length; j++) {
+        ch = rows[i].charAt(j);
+        if (ch >= '1' && ch <= '5') { f += parseInt(ch, 10); continue; }
+        board[r * N + f] = { c: ch === ch.toUpperCase() ? 'w' : 'b', t: ch.toLowerCase(), id: id++ };
+        f++;
+      }
+    }
+    return board;
+  }
+
+  function lastRank(c) { return c === 'w' ? N - 1 : 0; }
+
+  // Ходи фігури без перевірки, чи не лишається свій король під шахом.
+  function pseudoMoves(board, sq) {
+    var p = board[sq], res = [], f = fileOf(sq), r = rankOf(sq), i, d, nf, nr, t;
+    if (!p) return res;
+    function add(to, cap) {
+      res.push({ from: sq, to: to, capture: cap, promo: p.t === 'p' && rankOf(to) === lastRank(p.c) });
+    }
+    if (p.t === 'p') {
+      nr = r + (p.c === 'w' ? 1 : -1);
+      if (nr < 0 || nr >= N) return res;
+      if (!board[nr * N + f]) add(nr * N + f, false);
+      for (i = -1; i <= 1; i += 2) {
+        nf = f + i;
+        if (nf < 0 || nf >= N) continue;
+        t = board[nr * N + nf];
+        if (t && t.c !== p.c) add(nr * N + nf, true);
+      }
+      return res;
+    }
+    var dirs = DIRS[p.t], slide = p.t === 'r' || p.t === 'b' || p.t === 'q';
+    for (i = 0; i < dirs.length; i++) {
+      d = dirs[i];
+      nf = f + d[0];
+      nr = r + d[1];
+      while (nf >= 0 && nf < N && nr >= 0 && nr < N) {
+        t = board[nr * N + nf];
+        if (t) {
+          if (t.c !== p.c) add(nr * N + nf, true);
+          break;
+        }
+        add(nr * N + nf, false);
+        if (!slide) break;
+        nf += d[0];
+        nr += d[1];
+      }
+    }
+    return res;
+  }
+
+  function makeBoard(board, m, rules) {
+    var b = board.slice(), p = b[m.from];
+    b[m.to] = (m.promo && rules.promo === 'queen') ? { c: p.c, t: 'q', id: p.id } : p;
+    if (m.promo && rules.promo === 'escape') b[m.to] = null;
+    b[m.from] = null;
+    return b;
+  }
+
+  function kingSquare(board, c) {
+    for (var i = 0; i < board.length; i++) {
+      if (board[i] && board[i].c === c && board[i].t === 'k') return i;
+    }
+    return -1;
+  }
+
+  function attacked(board, sq, by) {
+    for (var i = 0; i < board.length; i++) {
+      if (!board[i] || board[i].c !== by) continue;
+      var ms = pseudoMoves(board, i);
+      for (var j = 0; j < ms.length; j++) if (ms[j].to === sq) return true;
+    }
+    return false;
+  }
+
+  function inCheck(board, c) {
+    var k = kingSquare(board, c);
+    return k >= 0 && attacked(board, k, other(c));
+  }
+
+  // Усі ходи фігури на клітинці sq (незалежно від того, чия черга) — для підказки-крапок.
+  function movesFrom(state, sq) {
+    var p = state.board[sq];
+    if (!p) return [];
+    var ms = pseudoMoves(state.board, sq);
+    if (!state.rules.mate) return ms;
+    var res = [];
+    for (var i = 0; i < ms.length; i++) {
+      if (!inCheck(makeBoard(state.board, ms[i], state.rules), p.c)) res.push(ms[i]);
+    }
+    return res;
+  }
+
+  function legalMoves(state) {
+    if (state.over) return [];
+    var res = [];
+    for (var i = 0; i < state.board.length; i++) {
+      if (state.board[i] && state.board[i].c === state.turn) res = res.concat(movesFrom(state, i));
+    }
+    return res;
+  }
+
+  function countPieces(board, c) {
+    var n = 0;
+    for (var i = 0; i < board.length; i++) if (board[i] && board[i].c === c) n++;
+    return n;
+  }
+
+  function onlyKings(board) {
+    var any = false;
+    for (var i = 0; i < board.length; i++) {
+      if (!board[i]) continue;
+      if (board[i].t !== 'k') return false;
+      any = true;
+    }
+    return any;
+  }
+
+  // setup і turn — необов'язкові: довільна розстановка з правилами рівня (для тестів).
+  function createGame(level, realRules, setup, turn) {
+    var L = LEVELS[level - 1];
+    var rules = (level === 7 && realRules) ? REAL_RULES : L.rules;
+    var board = parse(setup || L.setup);
+    return {
+      level: level, rules: rules, board: board, turn: turn || 'w',
+      start: { w: countPieces(board, 'w'), b: countPieces(board, 'b') },
+      escaped: { w: 0, b: 0 },
+      plies: 0, quiet: 0, over: false, winner: null, reason: '', last: null
+    };
+  }
+
+  function finish(s, winner, reason) {
+    s.over = true;
+    s.winner = winner;
+    s.reason = reason;
+    return s;
+  }
+
+  // Рахунок у рівнях з утечею: скільки пішаків чорних з'їдено, утекло й лишилось.
+  function score(s) {
+    var left = countPieces(s.board, 'b');
+    return { eaten: s.start.b - s.escaped.b - left, escaped: s.escaped.b, left: left, total: s.start.b };
+  }
+
+  // Підсумок рівня з утечею; null — гра триває. Заблоковані пішаки (blocked) — спіймані.
+  function escapeResult(s, blocked) {
+    var sc = score(s), caught = sc.eaten + (blocked ? sc.left : 0);
+    if (countPieces(s.board, 'w') === 0) return finish(s, 'b', 'all');
+    if (caught * 2 > sc.total) return finish(s, 'w', 'score');
+    if (sc.escaped * 2 > sc.total) return finish(s, 'b', 'score');
+    if (sc.left === 0 || blocked) return finish(s, caught > sc.escaped ? 'w' : caught < sc.escaped ? 'b' : null, 'score');
+    return null;
+  }
+
+  // Новий стан після ходу m (хід має бути з legalMoves). reason:
+  // promote — пішак дійшов; king — з'їли короля; all — з'їли всіх; nomoves — суперникові
+  // нічим ходити; score — рахунок у рівнях з утечею; mate — мат; stalemate, kings, quiet — нічия.
+  function applyMove(s, m) {
+    var mover = s.board[m.from], captured = s.board[m.to], opp = other(mover.c);
+    var b = makeBoard(s.board, m, s.rules);
+    var escaped = m.promo && s.rules.promo === 'escape';
+    var ns = {
+      level: s.level, rules: s.rules, board: b, turn: opp, start: s.start,
+      escaped: {
+        w: s.escaped.w + (escaped && mover.c === 'w' ? 1 : 0),
+        b: s.escaped.b + (escaped && mover.c === 'b' ? 1 : 0)
+      },
+      plies: s.plies + 1,
+      quiet: (captured || mover.t === 'p') ? 0 : s.quiet + 1,
+      over: false, winner: null, reason: '',
+      last: {
+        from: m.from, to: m.to, capture: !!captured, promo: m.promo, escaped: escaped,
+        piece: mover, captured: captured
+      }
+    };
+    if (m.promo && s.rules.promo === 'win') return finish(ns, mover.c, 'promote');
+    if (captured && captured.t === 'k') return finish(ns, mover.c, 'king');
+    if (s.rules.promo === 'escape') {
+      if (escapeResult(ns, false)) return ns;
+      if (legalMoves(ns).length === 0) return escapeResult(ns, true);
+      return ns;
+    }
+    if (countPieces(b, opp) === 0) return finish(ns, mover.c, 'all');
+    if (legalMoves(ns).length === 0) {
+      if (!s.rules.mate) return finish(ns, mover.c, 'nomoves');
+      return inCheck(b, opp) ? finish(ns, mover.c, 'mate') : finish(ns, null, 'stalemate');
+    }
+    if (onlyKings(b)) return finish(ns, null, 'kings');
+    if (ns.quiet >= QUIET_LIMIT) return finish(ns, null, 'quiet');
+    return ns;
+  }
+
+  function findMove(s, from, to) {
+    var ms = legalMoves(s);
+    for (var i = 0; i < ms.length; i++) if (ms[i].from === from && ms[i].to === to) return ms[i];
+    return null;
+  }
+
+  // Зірочки за перемогу білих: 1 — перемога; +1 — чисто (у рівнях з утечею не втік жоден
+  // пішак, в інших — втрачено не більше третини своїх фігур); +1 — суперник «Лисичка» чи вчитель.
+  function stars(s, opponent) {
+    if (!s.over || s.winner !== 'w') return 0;
+    var n = 1, clean;
+    if (s.rules.promo === 'escape') clean = s.escaped.b === 0;
+    else clean = s.start.w - countPieces(s.board, 'w') <= Math.floor(s.start.w / 3);
+    if (clean) n++;
+    if (opponent !== 'bear') n++;
+    return n;
+  }
+
+  /* ---------- Боти ---------- */
+
+  function pickRandom(list, rnd) { return list[Math.floor(rnd() * list.length)]; }
+
+  // «Ведмедик»: випадковий хід, але якщо можна щось з'їсти — їсть.
+  function botBear(s, rnd) {
+    rnd = rnd || Math.random;
+    var ms = legalMoves(s), caps = [];
+    for (var i = 0; i < ms.length; i++) if (ms[i].capture) caps.push(ms[i]);
+    return ms.length ? pickRandom(caps.length ? caps : ms, rnd) : null;
+  }
+
+  // Оцінка з погляду кольору c: матеріал і просування пішаків.
+  var ADVANCE_WIN = [0, 2.5, 0.9, 0.35, 0.1];
+  var ADVANCE_QUEEN = [0, 1.2, 0.5, 0.2, 0];
+  var ESCAPE_VALUE = 4;
+  function evaluate(s, c) {
+    var sum = (s.escaped[c] - s.escaped[other(c)]) * ESCAPE_VALUE;
+    var adv = s.rules.promo === 'queen' ? ADVANCE_QUEEN : ADVANCE_WIN;
+    for (var i = 0; i < s.board.length; i++) {
+      var p = s.board[i];
+      if (!p) continue;
+      var v = VALUES[p.t];
+      if (p.t === 'p') v += adv[Math.abs(lastRank(p.c) - rankOf(i))];
+      sum += p.c === c ? v : -v;
+    }
+    return sum;
+  }
+
+  function Timeout() {}
+
+  function negamax(s, depth, alpha, beta, ply, deadline) {
+    if (s.over) {
+      if (!s.winner) return 0;
+      return s.winner === s.turn ? WIN - ply : -(WIN - ply);
+    }
+    if (depth === 0) return evaluate(s, s.turn);
+    if (Date.now() > deadline) throw new Timeout();
+    var ms = orderMoves(legalMoves(s)), best = -Infinity;
+    for (var i = 0; i < ms.length; i++) {
+      var v = -negamax(applyMove(s, ms[i]), depth - 1, -beta, -alpha, ply + 1, deadline);
+      if (v > best) best = v;
+      if (v > alpha) alpha = v;
+      if (alpha >= beta) break;
+    }
+    return best;
+  }
+
+  function orderMoves(ms) {
+    var caps = [], rest = [];
+    for (var i = 0; i < ms.length; i++) (ms[i].capture || ms[i].promo ? caps : rest).push(ms[i]);
+    return caps.concat(rest);
+  }
+
+  // «Лисичка»: мінімакс (негамакс з відсіканням) на 1..maxDepth півходів, у межах timeLimit мс.
+  function botFox(s, rnd, maxDepth, timeLimit) {
+    rnd = rnd || Math.random;
+    maxDepth = maxDepth || 3;
+    var deadline = Date.now() + (timeLimit || 900);
+    var ms = legalMoves(s);
+    if (!ms.length) return null;
+    var best = ms[0];
+    for (var depth = 1; depth <= maxDepth; depth++) {
+      try {
+        var scored = [], top = -Infinity, i;
+        for (i = 0; i < ms.length; i++) {
+          var v = -negamax(applyMove(s, ms[i]), depth - 1, -Infinity, Infinity, 1, deadline);
+          scored.push(v);
+          if (v > top) top = v;
+        }
+        // Серед рівноцінних ходів — випадковий, щоб ігри не повторювались.
+        var good = [];
+        for (i = 0; i < ms.length; i++) if (scored[i] >= top - 0.05) good.push(ms[i]);
+        best = pickRandom(good, rnd);
+        if (top >= WIN - 100) break;
+      } catch (e) {
+        if (e instanceof Timeout) break;
+        throw e;
+      }
+    }
+    return best;
+  }
+
+  return {
+    LEVELS: LEVELS, QUIET_LIMIT: QUIET_LIMIT,
+    parse: parse, createGame: createGame, legalMoves: legalMoves, movesFrom: movesFrom,
+    applyMove: applyMove, findMove: findMove, inCheck: inCheck, kingSquare: kingSquare,
+    countPieces: countPieces, score: score, stars: stars, botBear: botBear, botFox: botFox,
+    evaluate: evaluate, sqName: sqName, sqIndex: sqIndex, other: other
+  };
+})();
+/* ENGINE:END */
+</script>
+<script>
+(function () {
+  'use strict';
+
+  /* ================== НАЛАШТУВАННЯ (див. mini-chess/README.md) ================== */
+
+  // Ключ Ably для онлайн-гри з вчителем (лише Publish/Subscribe на каналах mini-chess:*).
+  // Заглушка "<КЛЮЧ_ABLY>" вимикає онлайн.
+  var ABLY_KEY = "HKRVtg.MscH2Q:AW1i-UndGu03DiHJOQ4M4j47m6R_exbbyt2P9GcF95U";
+  var ABLY_SRC = 'https://cdn.jsdelivr.net/npm/ably@2.29.0/build/ably.min.js';
+  var ABLY_SRI = 'sha384-xVSjbV2fXZTi9caskIhs88kPVeOVfWhVLoNKldOsEkSonNL5mjlfhVIR8pwF012V';
+  var ROOM_PREFIX = 'mini-chess:';
+
+  var TEACHER_PIN = '1234';
+  var BOT_DELAY = 600;           // мс від ходу дитини до ходу бота
+  var STORE_KEY = 'mini-chess-progress-v1';
+
+  var MC = MiniChess;
+  var LEVEL_COUNT = MC.LEVELS.length;
+
+  // Тексти рівнів. hint — рівно одне речення про те, як ходить нова фігура.
+  // demo — анімація підказки: розстановка, фігура-герой і клітинки, куди вона ходить.
+  var LEVEL_INFO = [
+    { name: 'Пішаки', piece: 'p',
+      hint: 'Пішак ходить на одну клітинку вперед, а б’є навскоси.',
+      goal: 'Дійди пішаком до кінця або з’їж усіх',
+      demo: { setup: '5/5/1p1p1/2P2/5', hero: 'c2', path: ['c3', 'd3', 'b3'] } },
+    { name: 'Тура', piece: 'r',
+      hint: 'Тура ходить прямо: вперед, назад, ліворуч і праворуч.',
+      goal: 'З’їж більше пішаків, ніж утече',
+      demo: { setup: '5/5/2R2/5/5', hero: 'c3', path: ['c5', 'a3', 'e3', 'c1'] } },
+    { name: 'Слон', piece: 'b',
+      hint: 'Слон ходить навскоси на будь-яку кількість клітинок.',
+      goal: 'З’їж більше пішаків, ніж утече',
+      demo: { setup: '5/5/2B2/5/5', hero: 'c3', path: ['e5', 'a5', 'a1', 'e1'] } },
+    { name: 'Кінь', piece: 'n',
+      hint: 'Кінь стрибає буквою «Г» і може перестрибувати через інші фігури.',
+      goal: 'З’їж більше пішаків, ніж утече',
+      demo: { setup: '5/5/2N2/5/5', hero: 'c3', path: ['d5', 'e2', 'b1', 'a4'], jump: true } },
+    { name: 'Ферзь', piece: 'q',
+      hint: 'Ферзь ходить і прямо, і навскоси — як тура і слон разом.',
+      goal: 'З’їж більше пішаків, ніж утече',
+      demo: { setup: '5/5/2Q2/5/5', hero: 'c3', path: ['c5', 'e5', 'e3', 'a1'] } },
+    { name: 'Король', piece: 'k',
+      hint: 'Король ходить лише на одну клітинку в будь-який бік.',
+      goal: 'Дійди пішаком до кінця або з’їж короля',
+      demo: { setup: '5/5/2K2/5/5', hero: 'c3', path: ['c4', 'd4', 'b2', 'd3'] } },
+    { name: 'Усі фігури', piece: 'all',
+      hint: 'Тут грають усі фігури разом — з’їж короля суперника!',
+      goal: 'З’їж короля',
+      demo: { setup: '4k/5/5/5/Q4', hero: 'a1', path: ['e5'] },
+      hintReal: 'Мат — це коли на короля напали, а сховатися йому нікуди.',
+      goalReal: 'Постав королю мат',
+      demoReal: { setup: 'k4/5/5/1K3/Q4', hero: 'a1', path: ['a4'], check: 'a5' } }
+  ];
+
+  var PIECE_NAMES = { p: 'пішак', r: 'тура', b: 'слон', n: 'кінь', q: 'ферзь', k: 'король' };
+
+  var REASONS = {
+    promote: { w: 'Пішак дійшов до кінця дошки!', l: 'Пішак суперника дійшов до кінця.' },
+    king: { w: 'Короля суперника з’їдено!', l: 'Твого короля з’їли.' },
+    all: { w: 'Усі фігури суперника з’їдено!', l: 'Усі твої фігури з’їли.' },
+    nomoves: { w: 'Суперникові нічим ходити.', l: 'Тобі нічим ходити.' },
+    mate: { w: 'Мат!', l: 'Тобі мат.' },
+    stalemate: { d: 'Пат: ходити нікуди, але шаху немає.' },
+    kings: { d: 'На дошці лишились тільки королі.' },
+    quiet: { d: 'Довго ніхто нікого не з’їв.' }
+  };
+
+  /* ================== ІКОНКИ Й ФІГУРИ (власні SVG) ================== */
+
+  // Кожна фігура малюється двічі: товстим обведенням (.o), а зверху — заливкою (.f).
+  var PIECE_PARTS = {
+    p: '<circle cx="50" cy="30" r="13"/><rect x="35" y="44" width="30" height="8" rx="4"/>' +
+       '<path d="M41 50C41 62 34 70 31 78H69C66 70 59 62 59 50Z"/><rect x="22" y="76" width="56" height="14" rx="6"/>',
+    r: '<path d="M24 13H36V21H44V13H56V21H64V13H76V36H24Z"/><rect x="29" y="34" width="42" height="7" rx="3"/>' +
+       '<path d="M34 40H66L69 77H31Z"/><rect x="20" y="75" width="60" height="15" rx="6"/>',
+    b: '<circle cx="50" cy="12" r="6"/><path d="M50 18C67 30 67 44 59 52H41C33 44 33 30 50 18Z"/>' +
+       '<rect x="34" y="51" width="32" height="8" rx="4"/><path d="M41 58C41 66 35 72 32 78H68C65 72 59 66 59 58Z"/>' +
+       '<rect x="22" y="76" width="56" height="14" rx="6"/>',
+    n: '<path d="M31 78C30 66 36 58 45 51C38 51 31 55 25 55C18 55 15 49 18 44L33 26C35 20 41 15 47 14L49 7L56 14C71 18 79 32 77 50C76 62 72 70 72 78Z"/>' +
+       '<rect x="22" y="76" width="58" height="14" rx="6"/>',
+    q: '<circle cx="24" cy="22" r="5"/><circle cx="37" cy="14" r="5"/><circle cx="50" cy="10" r="5"/>' +
+       '<circle cx="63" cy="14" r="5"/><circle cx="76" cy="22" r="5"/>' +
+       '<path d="M24 24L32 37L37 16L44 34L50 12L56 34L63 16L68 37L76 24L68 51H32Z"/>' +
+       '<rect x="31" y="50" width="38" height="8" rx="4"/><path d="M38 57C38 66 33 72 30 78H70C67 72 62 66 62 57Z"/>' +
+       '<rect x="22" y="76" width="56" height="14" rx="6"/>',
+    k: '<rect x="46" y="4" width="8" height="24" rx="2"/><rect x="38" y="10" width="24" height="8" rx="2"/>' +
+       '<path d="M50 30C41 19 22 22 25 37C27 44 31 48 34 53H66C69 48 73 44 75 37C78 22 59 19 50 30Z"/>' +
+       '<rect x="31" y="52" width="38" height="8" rx="4"/><path d="M38 59C38 67 33 72 30 78H70C67 72 62 67 62 59Z"/>' +
+       '<rect x="22" y="76" width="56" height="14" rx="6"/>'
+  };
+  var PIECE_DETAILS = {
+    p: '',
+    r: '<path class="d" d="M32 41H68"/>',
+    b: '<path class="d" d="M56 30L46 41"/>',
+    n: '<circle class="e" cx="45" cy="27" r="4"/><path class="d" d="M60 18C70 26 72 40 69 56"/><circle class="e" cx="24" cy="47" r="2.5"/>',
+    q: '',
+    k: '<path class="d" d="M50 32V50"/>'
+  };
+
+  function pieceSvg(t, c) {
+    var parts = PIECE_PARTS[t];
+    return '<svg class="pc pc-' + c + '" viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+      '<g class="o">' + parts + '</g><g class="f">' + parts + '</g>' + PIECE_DETAILS[t] + '</svg>';
+  }
+
+  var ICONS = {
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
+    soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>',
+    soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 9l6 6M22 9l-6 6"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="#fff"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+    unlock: '<svg viewBox="0 0 24 24" fill="none" stroke="#ffc21a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="#ffc21a"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>',
+    lockBig: '<svg viewBox="0 0 24 24" fill="none" stroke="#1a2c54" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="#1a2c54"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><circle cx="12" cy="16" r="1.5" fill="#fff" stroke="none"/></svg>',
+    speak: '<svg viewBox="0 0 24 24" fill="none" stroke="#1a2c54" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#1a2c54"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>',
+    retry: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8"/><path d="M4 4v5h5"/></svg>',
+    next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    homeDark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>',
+    del: '<svg viewBox="0 0 24 24" fill="none" stroke="#1a2c54" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/></svg>',
+    people: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3.2"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 20c.5-4 3-6 5.5-6s5 2 5.5 6M14 14.5c3 0 5.5 1.5 6 5.5"/></svg>',
+    target: '<svg viewBox="0 0 24 24" fill="none" stroke="#d6401a" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="#d6401a"/></svg>',
+    trophy: '<svg viewBox="0 0 64 64"><path d="M18 8h28v14a14 14 0 0 1-28 0z" fill="#ffc21a" stroke="#b7860b" stroke-width="3"/><path d="M18 13H9c0 9 4 14 10 15M46 13h9c0 9-4 14-10 15" fill="none" stroke="#b7860b" stroke-width="3" stroke-linecap="round"/><rect x="28" y="35" width="8" height="10" fill="#ffc21a" stroke="#b7860b" stroke-width="3"/><rect x="18" y="45" width="28" height="10" rx="3" fill="#d6401a" stroke="#b23312" stroke-width="3"/></svg>',
+    hug: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#ffc21a" stroke="#b7860b" stroke-width="3"/><circle cx="23" cy="27" r="3.5" fill="#1a2c54"/><circle cx="41" cy="27" r="3.5" fill="#1a2c54"/><path d="M21 39c6 6 16 6 22 0" fill="none" stroke="#1a2c54" stroke-width="3.5" stroke-linecap="round"/><circle cx="17" cy="36" r="4" fill="#ff9a7a"/><circle cx="47" cy="36" r="4" fill="#ff9a7a"/></svg>',
+    draw: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#cfe5f8" stroke="#1a2c54" stroke-width="3"/><circle cx="23" cy="27" r="3.5" fill="#1a2c54"/><circle cx="41" cy="27" r="3.5" fill="#1a2c54"/><path d="M22 41h20" stroke="#1a2c54" stroke-width="3.5" stroke-linecap="round"/></svg>',
+    run: '<svg viewBox="0 0 24 24" fill="none" stroke="#4f628a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h12M12 7l5 5-5 5M20 5v14"/></svg>'
+  };
+
+  function starSvg(on) {
+    return '<svg viewBox="0 0 24 24"><path class="' + (on ? 'star-on' : 'star-off') +
+      '" stroke-width="1.5" stroke-linejoin="round" d="M12 2.5l2.9 6 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.2 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>';
+  }
+
+  var AVATARS = {
+    bear: '<svg viewBox="0 0 64 64"><circle cx="14" cy="16" r="9" fill="#8a5a33"/><circle cx="50" cy="16" r="9" fill="#8a5a33"/>' +
+      '<circle cx="14" cy="16" r="4.5" fill="#e0b48a"/><circle cx="50" cy="16" r="4.5" fill="#e0b48a"/>' +
+      '<circle cx="32" cy="35" r="24" fill="#a86b3c"/><ellipse cx="32" cy="43" rx="11" ry="9" fill="#e0b48a"/>' +
+      '<circle cx="23" cy="31" r="3.5" fill="#1a2c54"/><circle cx="41" cy="31" r="3.5" fill="#1a2c54"/>' +
+      '<ellipse cx="32" cy="39" rx="4.5" ry="3.2" fill="#1a2c54"/><path d="M28 46q4 3 8 0" fill="none" stroke="#1a2c54" stroke-width="2" stroke-linecap="round"/></svg>',
+    fox: '<svg viewBox="0 0 64 64"><path d="M8 6l16 14-12 10z" fill="#e8751a"/><path d="M56 6L40 20l12 10z" fill="#e8751a"/>' +
+      '<path d="M12 10l9 9-7 6z" fill="#1a2c54"/><path d="M52 10l-9 9 7 6z" fill="#1a2c54"/>' +
+      '<path d="M32 58L8 32c0-10 10-16 24-16s24 6 24 16z" fill="#f28c28"/>' +
+      '<path d="M32 58L14 38c6 0 12 2 18 8 6-6 12-8 18-8z" fill="#fff"/>' +
+      '<circle cx="23" cy="31" r="3.5" fill="#1a2c54"/><circle cx="41" cy="31" r="3.5" fill="#1a2c54"/>' +
+      '<ellipse cx="32" cy="53" rx="4" ry="3" fill="#1a2c54"/></svg>',
+    teacher: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#cfe5f8"/><circle cx="32" cy="25" r="11" fill="#1a2c54"/>' +
+      '<path d="M12 56c2-12 10-18 20-18s18 6 20 18" fill="#1a2c54"/><rect x="26" y="40" width="12" height="4" rx="2" fill="#d6401a"/></svg>',
+    student: '<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe08a"/><circle cx="32" cy="27" r="10" fill="#d6401a"/>' +
+      '<path d="M15 56c2-10 9-15 17-15s15 5 17 15" fill="#d6401a"/></svg>'
+  };
+
+  /* ================== ДОПОМІЖНЕ ================== */
+
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html) e.innerHTML = html;
+    return e;
+  }
+  function later(fn, ms) { return window.setTimeout(fn, ms); }
+
+  /* ================== ПРОГРЕС (localStorage) ================== */
+  // Зберігаються лише зірочки рівнів, «усі рівні відкрито» і вимкнений звук.
+
+  function blankProgress() {
+    var stars = [];
+    for (var i = 0; i < LEVEL_COUNT; i++) stars.push(0);
+    return { stars: stars, all: false, mute: false };
+  }
+
+  function loadProgress() {
+    var p = blankProgress();
+    try {
+      var raw = window.localStorage.getItem(STORE_KEY);
+      if (raw) {
+        var d = JSON.parse(raw);
+        for (var i = 0; i < LEVEL_COUNT; i++) {
+          var s = d.stars && d.stars[i];
+          p.stars[i] = (typeof s === 'number' && s >= 0 && s <= 3) ? s : 0;
+        }
+        p.all = d.all === true;
+        p.mute = d.mute === true;
+      }
+    } catch (e) { /* сховище недоступне — граємо без збереження */ }
+    return p;
+  }
+
+  function saveProgress() {
+    try { window.localStorage.setItem(STORE_KEY, JSON.stringify(progress)); } catch (e) { /* ігноруємо */ }
+  }
+
+  var progress = loadProgress();
+
+  function isOpen(level) {
+    return progress.all || level === 1 || progress.stars[level - 2] > 0;
+  }
+
+  /* ================== ЗВУК (WebAudio, синтез) ================== */
+
+  var Sound = {
+    ctx: null,
+    unlock: function () {
+      if (!this.ctx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        try { this.ctx = new AC(); } catch (e) { return; }
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+    },
+    tone: function (freq, at, dur, type, vol, freqEnd) {
+      var c = this.ctx, t = c.currentTime + at;
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(freq, t);
+      if (freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+      g.connect(c.destination);
+      o.start(t);
+      o.stop(t + dur + 0.02);
+    },
+    noise: function (at, dur, vol, freq) {
+      var c = this.ctx, t = c.currentTime + at, n = Math.floor(c.sampleRate * dur);
+      var buf = c.createBuffer(1, n, c.sampleRate), data = buf.getChannelData(0);
+      for (var i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / n);
+      var src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      src.buffer = buf;
+      f.type = 'bandpass';
+      f.frequency.value = freq;
+      g.gain.value = vol;
+      src.connect(f);
+      f.connect(g);
+      g.connect(c.destination);
+      src.start(t);
+    },
+    play: function (name) {
+      if (progress.mute || !this.ctx) return;
+      try {
+        if (name === 'move') {
+          this.tone(620, 0, 0.09, 'triangle', 0.3, 380);
+          this.noise(0, 0.04, 0.25, 1800);
+        } else if (name === 'capture') {
+          this.noise(0, 0.14, 0.6, 900);
+          this.tone(300, 0, 0.18, 'square', 0.12, 110);
+          this.tone(900, 0.05, 0.12, 'triangle', 0.18, 1400);
+        } else if (name === 'select') {
+          this.tone(880, 0, 0.06, 'sine', 0.12);
+        } else if (name === 'escape') {
+          this.tone(700, 0, 0.35, 'sine', 0.2, 180);
+        } else if (name === 'promo') {
+          this.tone(400, 0, 0.45, 'triangle', 0.22, 1300);
+          this.tone(1568, 0.45, 0.15, 'sine', 0.15);
+          this.tone(2093, 0.55, 0.25, 'sine', 0.15);
+        } else if (name === 'win') {
+          var notes = [523, 659, 784, 1047];
+          for (var i = 0; i < notes.length; i++) this.tone(notes[i], i * 0.13, 0.25, 'triangle', 0.25);
+          this.tone(1047, 0.52, 0.5, 'sine', 0.2);
+        } else if (name === 'lose') {
+          this.tone(392, 0, 0.3, 'triangle', 0.2);
+          this.tone(330, 0.28, 0.3, 'triangle', 0.2);
+          this.tone(262, 0.56, 0.5, 'triangle', 0.2);
+        } else if (name === 'error') {
+          this.tone(180, 0, 0.14, 'square', 0.1);
+        }
+      } catch (e) { /* звук не обов'язковий */ }
+    }
+  };
+
+  /* ================== ОЗВУЧЕННЯ ПІДКАЗКИ (якщо є український голос) ================== */
+
+  var ukVoice = null;
+  function findVoice() {
+    if (!window.speechSynthesis) return;
+    var vs = window.speechSynthesis.getVoices();
+    ukVoice = null;
+    for (var i = 0; i < vs.length; i++) {
+      if (/^uk/i.test(vs[i].lang)) { ukVoice = vs[i]; break; }
+    }
+    $('btn-speak').classList.toggle('hidden', !ukVoice);
+  }
+  function speak(text) {
+    if (!ukVoice) return;
+    var u = new window.SpeechSynthesisUtterance(text);
+    u.voice = ukVoice;
+    u.lang = ukVoice.lang;
+    u.rate = 0.9;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(u);
+  }
+
+  /* ================== КОНФЕТІ ================== */
+
+  var confetti = { parts: [], running: false };
+  function launchConfetti(count) {
+    var cv = $('confetti');
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) count = Math.floor(count / 3);
+    cv.classList.remove('hidden');
+    cv.width = window.innerWidth;
+    cv.height = window.innerHeight;
+    var colors = ['#d6401a', '#1a2c54', '#ffc21a', '#3fa9f5', '#34c759', '#ff7ab8'];
+    for (var i = 0; i < count; i++) {
+      confetti.parts.push({
+        x: cv.width / 2 + (Math.random() - 0.5) * cv.width * 0.3,
+        y: cv.height * 0.45,
+        vx: (Math.random() - 0.5) * 14,
+        vy: -Math.random() * 15 - 5,
+        r: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 0.4,
+        w: 7 + Math.random() * 7,
+        h: 4 + Math.random() * 5,
+        c: colors[i % colors.length],
+        life: 0
+      });
+    }
+    if (!confetti.running) {
+      confetti.running = true;
+      window.requestAnimationFrame(confettiFrame);
+    }
+  }
+  function stopConfetti() {
+    confetti.parts = [];
+  }
+  function confettiFrame() {
+    var cv = $('confetti'), ctx = cv.getContext('2d');
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    var alive = [];
+    for (var i = 0; i < confetti.parts.length; i++) {
+      var p = confetti.parts[i];
+      p.vy += 0.35;
+      p.vx *= 0.99;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.r += p.vr;
+      p.life++;
+      if (p.y < cv.height + 20 && p.life < 240) alive.push(p);
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.r);
+      ctx.fillStyle = p.c;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.life / 6)));
+      ctx.restore();
+    }
+    confetti.parts = alive;
+    if (alive.length) {
+      window.requestAnimationFrame(confettiFrame);
+    } else {
+      confetti.running = false;
+      cv.classList.add('hidden');
+    }
+  }
+
+  /* ================== ДОШКА (вигляд) ================== */
+
+  function BoardView(root, onTap) {
+    this.root = root;
+    this.flip = false;
+    this.pieces = {};
+    this.squares = [];
+    root.innerHTML = '';
+    for (var sq = 0; sq < 25; sq++) {
+      var s = el(onTap ? 'button' : 'div', 'sq');
+      if (onTap) {
+        s.type = 'button';
+        s.addEventListener('click', makeTap(onTap, sq));
+      }
+      s.appendChild(el('span', 'dot'));
+      root.appendChild(s);
+      this.squares.push(s);
+    }
+    this.layer = el('div', 'pieces');
+    root.appendChild(this.layer);
+    this.layout();
+  }
+  function makeTap(fn, sq) { return function () { fn(sq); }; }
+
+  BoardView.prototype.cell = function (sq) {
+    var f = sq % 5, r = (sq - f) / 5;
+    return this.flip ? { col: 4 - f, row: r } : { col: f, row: 4 - r };
+  };
+  BoardView.prototype.layout = function () {
+    for (var sq = 0; sq < 25; sq++) {
+      var c = this.cell(sq), s = this.squares[sq], f = sq % 5, r = (sq - f) / 5;
+      s.style.left = (c.col * 20) + '%';
+      s.style.top = (c.row * 20) + '%';
+      s.className = 'sq' + ((f + r) % 2 === 0 ? ' dark' : '');
+    }
+  };
+  BoardView.prototype.place = function (wrap, sq) {
+    var c = this.cell(sq);
+    wrap.style.transform = 'translate(' + (c.col * 100) + '%,' + (c.row * 100) + '%)';
+  };
+  // Розставити фігури. fx: instant — без анімації; jumpId — стрибок; escape — {id, to} пішак утікає.
+  BoardView.prototype.sync = function (board, fx) {
+    fx = fx || {};
+    var seen = {}, sq, id;
+    if (fx.instant) this.layer.className = 'pieces no-anim';
+    for (sq = 0; sq < 25; sq++) {
+      var p = board[sq];
+      if (!p) continue;
+      seen[p.id] = true;
+      var w = this.pieces[p.id], key = p.c + p.t;
+      if (!w) {
+        w = el('div', 'pc-wrap appear', '<div class="pc-in">' + pieceSvg(p.t, p.c) + '</div>');
+        w.setAttribute('data-k', key);
+        this.pieces[p.id] = w;
+        this.place(w, sq);
+        this.layer.appendChild(w);
+      } else if (w.getAttribute('data-k') !== key) {
+        w.setAttribute('data-k', key);
+        w.firstChild.innerHTML = pieceSvg(p.t, p.c);
+        restartClass(w, 'morph');
+      }
+      w.classList.remove('jump');
+      if (fx.jumpId === p.id) restartClass(w, 'jump');
+      this.place(w, sq);
+    }
+    for (id in this.pieces) {
+      if (!this.pieces.hasOwnProperty(id) || seen[id]) continue;
+      var gone = this.pieces[id];
+      delete this.pieces[id];
+      if (fx.instant) { this.layer.removeChild(gone); continue; }
+      if (fx.escape && String(fx.escape.id) === id) {
+        this.place(gone, fx.escape.to);
+        escapeOff(this, gone);
+      } else {
+        gone.classList.add('captured');
+        removeLater(gone, 350);
+      }
+    }
+    if (fx.instant) {
+      void this.layer.offsetWidth;
+      this.layer.className = 'pieces';
+    }
+    function escapeOff(view, w2) {
+      later(function () {
+        var c = w2.style.transform;
+        w2.classList.add('escaping');
+        w2.style.transform = c + ' translateY(' + (view.flip ? '-' : '') + '110%)';
+        removeLater(w2, 700);
+      }, 320);
+    }
+    function removeLater(w3, ms) {
+      later(function () { if (w3.parentNode) w3.parentNode.removeChild(w3); }, ms);
+    }
+  };
+  BoardView.prototype.pieceEl = function (id) { return this.pieces[id] || null; };
+  // Позначки: sel — вибрана клітинка, moves — ходи, foe — ходи «не для гри», last, check.
+  BoardView.prototype.marks = function (m) {
+    m = m || {};
+    var marks = {}, i;
+    if (m.moves) {
+      for (i = 0; i < m.moves.length; i++) marks[m.moves[i].to] = m.moves[i].capture ? 'cap' : 'mv';
+    }
+    for (var sq = 0; sq < 25; sq++) {
+      var s = this.squares[sq];
+      s.classList.toggle('sel', m.sel === sq);
+      s.classList.toggle('mv', marks[sq] === 'mv');
+      s.classList.toggle('cap', marks[sq] === 'cap');
+      s.classList.toggle('foe', !!m.foe && !!marks[sq]);
+      s.classList.toggle('last', !!m.last && (m.last.from === sq || m.last.to === sq));
+      s.classList.toggle('check', m.check === sq);
+    }
+    for (var id in this.pieces) {
+      if (this.pieces.hasOwnProperty(id)) this.pieces[id].classList.remove('sel');
+    }
+  };
+  BoardView.prototype.label = function (board) {
+    for (var sq = 0; sq < 25; sq++) {
+      var p = board[sq];
+      this.squares[sq].setAttribute('aria-label', MC.sqName(sq) + (p ? ', ' + (p.c === 'w' ? 'білі' : 'чорні') + ': ' + PIECE_NAMES[p.t] : ''));
+    }
+  };
+
+  function restartClass(node, cls) {
+    node.classList.remove(cls);
+    void node.offsetWidth;
+    node.classList.add(cls);
+  }
+
+  /* ================== ЕКРАНИ ================== */
+
+  var SCREENS = ['map', 'intro', 'game', 'join', 'teacher'];
+  var current = 'map';
+  function show(name) {
+    for (var i = 0; i < SCREENS.length; i++) $('scr-' + SCREENS[i]).classList.toggle('hidden', SCREENS[i] !== name);
+    current = name;
+    stopConfetti();
+    $('btn-home').classList.toggle('hidden', name === 'map');
+    if (name !== 'intro') stopDemo();
+    window.scrollTo(0, 0);
+  }
+
+  function goHome() {
+    $('top-title').textContent = 'Міні-шахи';
+    stopGame();
+    netClose();
+    hideOverlay('result');
+    renderMap();
+    show('map');
+  }
+
+  /* ---------- Карта ---------- */
+
+  function renderMap() {
+    var box = $('levels');
+    box.innerHTML = '';
+    var nextMarked = false;
+    for (var lv = 1; lv <= LEVEL_COUNT; lv++) {
+      var info = LEVEL_INFO[lv - 1], open = isOpen(lv), st = progress.stars[lv - 1];
+      var t = el('button', 'tile' + (open ? '' : ' locked'));
+      t.type = 'button';
+      var pic = info.piece === 'all' ? pieceSvg('k', 'w') + pieceSvg('q', 'b') : pieceSvg(info.piece, 'w');
+      var stars = '';
+      for (var i = 1; i <= 3; i++) stars += starSvg(st >= i);
+      t.innerHTML = '<span class="num">' + lv + '</span><span class="pic">' + pic + '</span>' +
+        '<span class="name">' + info.name + '</span><span class="stars">' + stars + '</span>' +
+        (open ? '' : '<span class="lock">' + ICONS.lockBig + '</span>');
+      t.setAttribute('aria-label', 'Рівень ' + lv + ': ' + info.name + (open ? ', зірочок: ' + st : ', закрито'));
+      if (open && !st && !nextMarked) { t.className += ' next'; nextMarked = true; }
+      t.addEventListener('click', makeLevelTap(lv, t));
+      box.appendChild(t);
+    }
+  }
+  function makeLevelTap(lv, tile) {
+    return function () {
+      Sound.unlock();
+      if (!isOpen(lv)) {
+        Sound.play('error');
+        restartClass(tile, 'shake');
+        return;
+      }
+      openIntro(lv);
+    };
+  }
+
+  /* ---------- Підказка рівня ---------- */
+
+  var intro = { level: 1, real: false };
+  var hintView = null;
+  var demoTimer = null;
+
+  function openIntro(lv) {
+    intro.level = lv;
+    intro.real = false;
+    $('intro-title').textContent = 'Рівень ' + lv + ': ' + LEVEL_INFO[lv - 1].name;
+    $('rules-toggle').classList.toggle('hidden', lv !== LEVEL_COUNT);
+    show('intro');
+    renderIntro();
+  }
+
+  function renderIntro() {
+    var info = LEVEL_INFO[intro.level - 1], real = intro.real && info.hintReal;
+    $('hint-text').textContent = real ? info.hintReal : info.hint;
+    $('intro-goal').innerHTML = ICONS.target + '<span></span>';
+    $('intro-goal').lastChild.textContent = real ? info.goalReal : info.goal;
+    setRadio($('rules-toggle'), intro.real ? '1' : '0');
+    startDemo(real ? info.demoReal : info.demo, real ? MC.createGame(LEVEL_COUNT, true).rules : MC.LEVELS[intro.level - 1].rules);
+  }
+
+  function setRadio(group, val) {
+    var bs = group.getElementsByTagName('button');
+    for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-checked', bs[i].getAttribute('data-real') === val ? 'true' : 'false');
+  }
+
+  function startDemo(d, rules) {
+    stopDemo();
+    if (!hintView) hintView = new BoardView($('hint-board'), null);
+    var board = MC.parse(d.setup), hero = MC.sqIndex(d.hero), seg = 0;
+    var moves = MC.movesFrom({ board: board, rules: rules }, hero);
+    hintView.sync(board, { instant: true });
+    hintView.marks({ sel: hero, moves: moves });
+    function step() {
+      var to = MC.sqIndex(d.path[seg % d.path.length]), b2 = board.slice();
+      b2[to] = b2[hero];
+      b2[hero] = null;
+      hintView.sync(b2, { jumpId: d.jump ? b2[to].id : null });
+      hintView.marks({ sel: to, check: d.check ? MC.sqIndex(d.check) : -1 });
+      demoTimer = later(function () {
+        hintView.sync(board, { instant: true });
+        hintView.marks({ sel: hero, moves: moves });
+        seg++;
+        demoTimer = later(step, 700);
+      }, 1500);
+    }
+    demoTimer = later(step, 900);
+  }
+  function stopDemo() {
+    if (demoTimer) window.clearTimeout(demoTimer);
+    demoTimer = null;
+  }
+
+  /* ================== ГРА ================== */
+
+  var G = {
+    mode: 'bot',          // bot | online
+    level: 1,
+    real: false,
+    opponent: 'bear',     // bear | fox | teacher (з погляду учня) або student (з погляду вчителя)
+    me: 'w',
+    state: null,
+    sel: -1,
+    busy: false,
+    moves: [],            // [[from, to], ...] — для синхронізації онлайн
+    taken: { w: [], b: [] },  // що з'їв кожен колір
+    gameNo: 0,
+    timers: []
+  };
+  var view = null;
+
+  function gameLater(fn, ms) { G.timers.push(later(fn, ms)); }
+  function clearGameTimers() {
+    for (var i = 0; i < G.timers.length; i++) window.clearTimeout(G.timers[i]);
+    G.timers = [];
+  }
+
+  function stopGame() {
+    clearGameTimers();
+    G.state = null;
+    G.busy = false;
+  }
+
+  function startGame(level, opts) {
+    clearGameTimers();
+    hideOverlay('result');
+    G.mode = opts.mode;
+    G.level = level;
+    G.real = !!opts.real;
+    G.opponent = opts.opponent;
+    G.me = opts.me || 'w';
+    G.state = MC.createGame(level, G.real);
+    G.sel = -1;
+    G.busy = false;
+    G.moves = [];
+    G.taken = { w: [], b: [] };
+    if (!view) view = new BoardView($('board'), onSquare);
+    view.flip = G.me === 'b';
+    view.layout();
+    var replay = opts.moves || [];
+    for (var i = 0; i < replay.length; i++) {
+      var m = MC.findMove(G.state, replay[i][0], replay[i][1]);
+      if (!m) break;
+      record(m);
+    }
+    view.sync(G.state.board, { instant: true });
+    var info = LEVEL_INFO[level - 1];
+    $('goal-line').textContent = (G.real && info.goalReal) ? info.goalReal : info.goal;
+    $('top-title').textContent = 'Рівень ' + level;
+    $('room').classList.toggle('hidden', G.mode !== 'online');
+    $('btn-restart').classList.toggle('hidden', G.mode === 'online' && G.me === 'w');
+    show('game');
+    refresh();
+    if (G.state.over) gameLater(showResult, 300);
+  }
+
+  function record(m) {
+    var before = G.state;
+    G.state = MC.applyMove(before, m);
+    G.moves.push([m.from, m.to]);
+    var last = G.state.last;
+    if (last.captured) G.taken[last.piece.c].push(last.captured.t);
+    return G.state;
+  }
+
+  function myTurn() {
+    return G.state && !G.state.over && !G.busy && G.state.turn === G.me;
+  }
+
+  function onSquare(sq) {
+    Sound.unlock();
+    if (!G.state) return;
+    var s = G.state;
+    if (G.sel >= 0 && myTurn() && s.board[G.sel] && s.board[G.sel].c === G.me) {
+      var m = MC.findMove(s, G.sel, sq);
+      if (m) {
+        G.sel = -1;
+        playMove(m, false);
+        return;
+      }
+    }
+    G.sel = (s.board[sq] && sq !== G.sel) ? sq : -1;
+    if (G.sel >= 0) Sound.play('select');
+    renderMarks();
+  }
+
+  function playMove(m, fromNet) {
+    var mover = G.state.board[m.from];
+    var ns = record(m);
+    var last = ns.last;
+    G.sel = -1;
+    G.busy = true;
+    if (G.mode === 'online' && !fromNet) send('move', { from: m.from, to: m.to, ply: ns.plies - 1, game: G.gameNo });
+
+    Sound.play(last.capture ? 'capture' : 'move');
+    view.sync(ns.board, {
+      jumpId: mover.t === 'n' ? mover.id : null,
+      escape: last.escaped ? { id: mover.id, to: m.to } : null
+    });
+    refresh();
+
+    var wait = 350;
+    if (last.escaped) {
+      gameLater(function () { Sound.play('escape'); }, 320);
+    } else if (m.promo) {
+      // Пішак дійшов до останнього ряду: сяйво, конфеті, а в рівні 7 — перетворення на ферзя.
+      wait = 1200;
+      var mine = mover.c === G.me;
+      gameLater(function () {
+        var w = view.pieceEl(mover.id);
+        if (w) restartClass(w, 'glow');
+        if (mine) {
+          Sound.play('promo');
+          launchConfetti(90);
+        }
+      }, 300);
+    }
+    gameLater(afterMove, wait);
+  }
+
+  function afterMove() {
+    G.busy = false;
+    if (!G.state) return;
+    if (G.state.over) {
+      refresh();
+      gameLater(showResult, 600);
+      return;
+    }
+    refresh();
+    if (G.mode === 'bot' && G.state.turn !== G.me) {
+      G.busy = true;
+      refresh();
+      gameLater(botMove, Math.max(0, BOT_DELAY - 350));
+    }
+  }
+
+  function botMove() {
+    if (!G.state || G.state.over) return;
+    var m = G.opponent === 'fox' ? MC.botFox(G.state) : MC.botBear(G.state);
+    G.busy = false;
+    if (m) playMove(m, false);
+  }
+
+  function refresh() {
+    renderMarks();
+    renderStatus();
+    renderTrays();
+    view.label(G.state.board);
+  }
+
+  function renderMarks() {
+    if (!G.state || !view) return;
+    var s = G.state, m = { last: s.last, check: -1 };
+    if (G.sel >= 0 && s.board[G.sel]) {
+      var p = s.board[G.sel];
+      m.sel = G.sel;
+      m.moves = MC.movesFrom(s, G.sel);
+      m.foe = !(p.c === G.me && s.turn === G.me && !s.over);
+      var w = view.pieceEl(p.id);
+      if (w) w.classList.add('sel');
+    }
+    if (s.rules.king || s.rules.mate) {
+      for (var i = 0; i < 2; i++) {
+        var c = i ? 'b' : 'w';
+        if (MC.inCheck(s.board, c)) m.check = MC.kingSquare(s.board, c);
+      }
+    }
+    view.marks(m);
+    if (m.sel >= 0) {
+      var w2 = view.pieceEl(s.board[m.sel].id);
+      if (w2) w2.classList.add('sel');
+    }
+  }
+
+  function opponentName() {
+    if (G.opponent === 'fox') return 'Лисичка';
+    if (G.opponent === 'bear') return 'Ведмедик';
+    if (G.opponent === 'teacher') return 'Вчитель';
+    return 'Учень';
+  }
+
+  function renderStatus() {
+    var s = G.state, box = $('status'), txt, ava;
+    var foeAva = AVATARS[G.opponent] || AVATARS.student;
+    var mineAva = pieceSvg('p', G.me);
+    if (s.over) {
+      txt = 'Гру закінчено';
+      ava = s.winner === G.me ? mineAva : foeAva;
+    } else if (myTurn()) {
+      txt = 'Твій хід';
+      ava = mineAva;
+    } else {
+      // Хід суперника або ще анімується його хід.
+      txt = opponentName() + (G.mode === 'bot' ? ' думає' : ' ходить');
+      ava = foeAva;
+    }
+    box.classList.toggle('my-turn', myTurn());
+    $('status-ava').innerHTML = ava;
+    $('status-txt').innerHTML = '';
+    $('status-txt').appendChild(document.createTextNode(txt));
+    if (!s.over && !myTurn()) $('status-txt').appendChild(el('span', 'thinking', '<i></i><i></i><i></i>'));
+  }
+
+  function trayHtml(list, color) {
+    var h = '';
+    for (var i = 0; i < list.length; i++) h += pieceSvg(list[i], color);
+    return h;
+  }
+
+  function renderTrays() {
+    var s = G.state, foe = MC.other(G.me);
+    var top = $('tray-top'), bottom = $('tray-bottom');
+    if (s.rules.promo === 'escape') {
+      var sc = MC.score(s), eaten = [], esc = [], i;
+      for (i = 0; i < sc.eaten; i++) eaten.push('p');
+      for (i = 0; i < sc.escaped; i++) esc.push('p');
+      // Учень (білі) їсть пішаків; пішаки чорних утікають.
+      var eatenHtml = '<span class="lbl">З’їдено: ' + sc.eaten + '</span>' + trayHtml(eaten, 'b');
+      var escHtml = '<span class="lbl">Утекли: ' + sc.escaped + '</span>' + ICONS.run + '<span class="esc">' + trayHtml(esc, 'b') + '</span>';
+      top.innerHTML = G.me === 'w' ? escHtml : eatenHtml;
+      bottom.innerHTML = G.me === 'w' ? eatenHtml : escHtml;
+      return;
+    }
+    top.innerHTML = trayHtml(G.taken[foe], G.me);
+    bottom.innerHTML = trayHtml(G.taken[G.me], foe);
+  }
+
+  /* ---------- Результат ---------- */
+
+  function showResult() {
+    var s = G.state;
+    if (!s || !s.over) return;
+    var win = s.winner === G.me, draw = !s.winner;
+    var r = REASONS[s.reason] || {}, reason = '';
+    if (s.reason === 'score') {
+      var sc = MC.score(s);
+      reason = 'З’їдено: ' + sc.eaten + ', утекли: ' + sc.escaped + '.';
+    } else {
+      reason = draw ? (r.d || '') : (win ? r.w : r.l) || '';
+    }
+    var stars = 0;
+    if (G.me === 'w' && win) {
+      stars = MC.stars(s, G.opponent);
+      if (stars > progress.stars[G.level - 1]) {
+        progress.stars[G.level - 1] = stars;
+        saveProgress();
+      }
+    }
+    var title = draw ? 'Нічия' : win ? 'Перемога!' : 'Спробуй ще раз!';
+    if (G.me === 'b') title = draw ? 'Нічия' : win ? 'Ви виграли' : 'Учень виграв!';
+    $('result-title').textContent = title;
+    $('result-reason').textContent = reason;
+    $('result-icon').innerHTML = draw ? ICONS.draw : (win || G.me === 'b') ? ICONS.trophy : ICONS.hug;
+    var starBox = $('result-stars');
+    starBox.innerHTML = '';
+    if (G.me === 'w' && win) {
+      for (var i = 1; i <= 3; i++) starBox.innerHTML += starSvg(stars >= i);
+    }
+    starBox.classList.toggle('hidden', !(G.me === 'w' && win));
+
+    var acts = $('result-actions');
+    acts.innerHTML = '';
+    if (G.mode === 'bot') {
+      if (win && G.level < LEVEL_COUNT) acts.appendChild(actionBtn('btn-primary', ICONS.next, 'Далі', function () {
+        hideOverlay('result');
+        openIntro(G.level + 1);
+      }));
+      acts.appendChild(actionBtn(win ? 'btn-secondary' : 'btn-primary', ICONS.retry, 'Ще раз', function () {
+        startGame(G.level, { mode: 'bot', real: G.real, opponent: G.opponent });
+      }));
+    } else if (G.me === 'b') {
+      acts.appendChild(actionBtn('btn-primary', ICONS.retry, 'Нова гра', teacherNewGame));
+    } else {
+      acts.appendChild(el('p', 'reason', 'Вчитель може почати нову гру.'));
+    }
+    acts.appendChild(actionBtn('btn-secondary', ICONS.homeDark, 'Додому', goHome));
+    $('result').classList.remove('hidden');
+
+    if (win && G.me === 'w') {
+      Sound.play('win');
+      launchConfetti(160);
+    } else if (!win && !draw && G.me === 'w') {
+      Sound.play('lose');
+    }
+  }
+
+  function actionBtn(cls, icon, text, fn) {
+    var b = el('button', 'btn ' + cls, icon);
+    b.type = 'button';
+    b.appendChild(document.createTextNode(text));
+    b.addEventListener('click', fn);
+    return b;
+  }
+  function hideOverlay(id) { $(id).classList.add('hidden'); }
+
+  /* ================== ВЧИТЕЛЬ: пароль і панель ================== */
+
+  var pinValue = '';
+  function buildPad(box, onDigit, onDel) {
+    var keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'del'];
+    box.innerHTML = '';
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (!k) { box.appendChild(el('span')); continue; }
+      var b = el('button', '', k === 'del' ? ICONS.del : k);
+      b.type = 'button';
+      b.setAttribute('aria-label', k === 'del' ? 'Стерти' : k);
+      b.addEventListener('click', k === 'del' ? onDel : makeDigit(onDigit, k));
+      box.appendChild(b);
+    }
+  }
+  function makeDigit(fn, k) { return function () { Sound.unlock(); Sound.play('select'); fn(k); }; }
+
+  function renderPinDots() {
+    var dots = $('pin-dots').getElementsByTagName('i');
+    for (var i = 0; i < dots.length; i++) dots[i].className = i < pinValue.length ? 'on' : '';
+  }
+  function openPin() {
+    pinValue = '';
+    renderPinDots();
+    $('pin').classList.remove('hidden');
+  }
+  function pinDigit(k) {
+    if (pinValue.length >= 4) return;
+    pinValue += k;
+    renderPinDots();
+    if (pinValue.length < 4) return;
+    if (pinValue === TEACHER_PIN) {
+      later(function () {
+        hideOverlay('pin');
+        openTeacher();
+      }, 150);
+    } else {
+      Sound.play('error');
+      restartClass($('pin-dialog'), 'shake');
+      later(function () { pinValue = ''; renderPinDots(); }, 400);
+    }
+  }
+
+  var teacherPick = { level: 1, real: false };
+  function openTeacher() {
+    stopGame();
+    netClose();
+    renderTeacher();
+    show('teacher');
+  }
+  function renderTeacher() {
+    $('btn-unlock-all').textContent = progress.all ? 'Закрити рівні знову' : 'Відкрити всі рівні';
+    var box = $('teacher-levels');
+    box.innerHTML = '';
+    for (var lv = 1; lv <= LEVEL_COUNT; lv++) {
+      var b = el('button', '', String(lv));
+      b.type = 'button';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', teacherPick.level === lv ? 'true' : 'false');
+      b.setAttribute('aria-label', 'Рівень ' + lv + ': ' + LEVEL_INFO[lv - 1].name);
+      b.addEventListener('click', makeTeacherLevel(lv));
+      box.appendChild(b);
+    }
+    $('teacher-rules').classList.toggle('hidden', teacherPick.level !== LEVEL_COUNT);
+    setRadio($('teacher-rules'), teacherPick.real ? '1' : '0');
+    $('teacher-msg').classList.add('hidden');
+  }
+  function makeTeacherLevel(lv) { return function () { teacherPick.level = lv; renderTeacher(); }; }
+
+  /* ================== ОНЛАЙН (Ably) ================== */
+  // Протокол каналу mini-chess:<код>:
+  //   hello {}                         — учень зайшов (або просить повторити стан);
+  //   setup {level, real, moves, game} — вчитель надсилає рівень і всі ходи поточної гри;
+  //   move  {from, to, ply, game}      — хід; ply — номер півходу до цього ходу;
+  //   bye   {}                         — хтось вийшов.
+  // Учень завжди грає білими, вчитель — чорними. Ходи перевіряються на обох сторонах.
+
+  var Net = { client: null, ch: null, role: '', code: '', helloTimer: null };
+
+  function ablyConfigured() {
+    return typeof ABLY_KEY === 'string' && ABLY_KEY.length > 10 && ABLY_KEY.indexOf('<') < 0;
+  }
+
+  function loadAbly(cb) {
+    if (window.Ably && window.Ably.Realtime) { cb(true); return; }
+    var s = document.createElement('script');
+    s.src = ABLY_SRC;
+    s.integrity = ABLY_SRI;
+    s.crossOrigin = 'anonymous';
+    s.onload = function () { cb(!!(window.Ably && window.Ably.Realtime)); };
+    s.onerror = function () { cb(false); };
+    document.head.appendChild(s);
+  }
+
+  function netConnect(code, role, onReady, onFail) {
+    if (!ablyConfigured()) {
+      onFail('Онлайн-гру ще не налаштовано: потрібно вставити ключ Ably у файл (ABLY_KEY).');
+      return;
+    }
+    loadAbly(function (ok) {
+      if (!ok) { onFail('Не вдалося під’єднатися. Перевірте інтернет і спробуйте ще раз.'); return; }
+      try {
+        Net.client = new window.Ably.Realtime({
+          key: ABLY_KEY,
+          clientId: role + '-' + Math.floor(Math.random() * 1e9).toString(36),
+          echoMessages: false
+        });
+        Net.role = role;
+        Net.code = code;
+        Net.client.connection.on(function (ch) { setNetStatus(ch.current); });
+        Net.ch = Net.client.channels.get(ROOM_PREFIX + code);
+        Net.ch.subscribe(function (msg) { onNet(msg.name, msg.data || {}); });
+      } catch (e) {
+        onFail('Не вдалося під’єднатися. Перевірте ключ Ably.');
+        return;
+      }
+      onReady();
+    });
+  }
+
+  function send(name, data) {
+    if (!Net.ch) return;
+    try {
+      var p = Net.ch.publish(name, data);
+      if (p && typeof p.then === 'function') p.then(null, function () { setNetStatus('failed'); });
+    } catch (e) { setNetStatus('failed'); }
+  }
+
+  function netClose() {
+    if (Net.helloTimer) window.clearInterval(Net.helloTimer);
+    if (Net.client) {
+      send('bye', {});
+      var c = Net.client;
+      later(function () { try { c.close(); } catch (e) { /* вже закрито */ } }, 300);
+    }
+    Net = { client: null, ch: null, role: '', code: '', helloTimer: null };
+  }
+
+  var NET_TEXT = {
+    initialized: 'Під’єднуємось…', connecting: 'Під’єднуємось…', connected: 'На зв’язку',
+    disconnected: 'Зв’язок перервано, повторюємо…', suspended: 'Немає зв’язку', closing: '', closed: '',
+    failed: 'Помилка зв’язку'
+  };
+  var peerText = '';
+  function setNetStatus(state) {
+    if (current === 'join' && (state === 'failed' || state === 'suspended')) {
+      // Учень ще вводить код: повертаємо можливість спробувати знову.
+      netClose();
+      joinCode = '';
+      renderJoin();
+      $('join-msg').textContent = 'Не вдалося під’єднатися. Перевірте інтернет і введіть код ще раз.';
+      return;
+    }
+    var t = NET_TEXT[state] || '';
+    if (state === 'connected' && peerText) t = peerText;
+    $('net-status').textContent = t;
+  }
+  function setPeer(text) {
+    peerText = text;
+    $('net-status').textContent = text;
+  }
+
+  /* ---------- Вчитель ---------- */
+
+  function createRoom() {
+    var code = String(1000 + Math.floor(Math.random() * 9000));
+    $('teacher-msg').classList.add('hidden');
+    netConnect(code, 'teacher', function () {
+      G.gameNo = 1;
+      $('room-code').textContent = code;
+      peerText = '';
+      startGame(teacherPick.level, { mode: 'online', real: teacherPick.level === LEVEL_COUNT && teacherPick.real, opponent: 'student', me: 'b' });
+      setPeer('Чекаємо учня…');
+      sendSetup();
+    }, function (msg) {
+      $('teacher-msg').textContent = msg;
+      $('teacher-msg').classList.remove('hidden');
+    });
+  }
+
+  function sendSetup() {
+    send('setup', { level: G.level, real: G.real, moves: G.moves, game: G.gameNo });
+  }
+
+  function teacherNewGame() {
+    G.gameNo++;
+    startGame(G.level, { mode: 'online', real: G.real, opponent: 'student', me: 'b' });
+    sendSetup();
+  }
+
+  /* ---------- Учень ---------- */
+
+  var joinCode = '';
+  function openJoin() {
+    joinCode = '';
+    renderJoin();
+    $('join-msg').classList.add('hidden');
+    show('join');
+  }
+  function renderJoin() {
+    var t = '';
+    for (var i = 0; i < 4; i++) t += i < joinCode.length ? joinCode.charAt(i) : '·';
+    $('join-code').textContent = t;
+  }
+  function joinDigit(k) {
+    if (joinCode.length >= 4 || Net.client) return;
+    joinCode += k;
+    renderJoin();
+    if (joinCode.length === 4) {
+      $('join-msg').textContent = 'Під’єднуємось… Чекаємо вчителя.';
+      $('join-msg').classList.remove('hidden');
+      netConnect(joinCode, 'student', function () {
+        send('hello', {});
+        // Якщо вчитель ще не відкрив кімнату, повторюємо привітання, доки не прийде setup.
+        Net.helloTimer = window.setInterval(function () { send('hello', {}); }, 3000);
+      }, function (msg) {
+        $('join-msg').textContent = msg;
+        joinCode = '';
+        renderJoin();
+      });
+    }
+  }
+  function joinDel() {
+    if (Net.client) return;
+    joinCode = joinCode.slice(0, -1);
+    renderJoin();
+  }
+
+  /* ---------- Повідомлення ---------- */
+
+  function onNet(name, d) {
+    if (Net.role === 'teacher') {
+      if (name === 'hello') {
+        setPeer('Учень у грі');
+        sendSetup();
+      } else if (name === 'move') {
+        netMove(d);
+      } else if (name === 'bye') {
+        setPeer('Учень вийшов');
+      }
+      return;
+    }
+    // Учень
+    if (name === 'setup') {
+      if (Net.helloTimer) { window.clearInterval(Net.helloTimer); Net.helloTimer = null; }
+      var lv = parseInt(d.level, 10);
+      if (!(lv >= 1 && lv <= LEVEL_COUNT) || !isMoveList(d.moves)) return;
+      var same = G.state && G.mode === 'online' && G.gameNo === d.game && G.moves.length === d.moves.length;
+      if (same) return;
+      G.gameNo = d.game;
+      $('room-code').textContent = Net.code;
+      peerText = 'Вчитель на зв’язку';
+      startGame(lv, { mode: 'online', real: !!d.real, opponent: 'teacher', me: 'w', moves: d.moves });
+      setPeer(peerText);
+    } else if (name === 'move') {
+      netMove(d);
+    } else if (name === 'bye') {
+      setPeer('Вчитель вийшов');
+    }
+  }
+
+  function isMoveList(list) {
+    if (!list || typeof list.length !== 'number' || list.length > 400) return false;
+    for (var i = 0; i < list.length; i++) {
+      if (!list[i] || !isSq(list[i][0]) || !isSq(list[i][1])) return false;
+    }
+    return true;
+  }
+  function isSq(x) { return typeof x === 'number' && x >= 0 && x < 25 && Math.floor(x) === x; }
+
+  function netMove(d) {
+    if (!G.state || G.mode !== 'online' || d.game !== G.gameNo) return;
+    if (G.busy && d.ply === G.state.plies) {
+      // Ще анімується попередній хід — приймемо цей трохи пізніше.
+      gameLater(function () { netMove(d); }, 200);
+      return;
+    }
+    if (d.ply !== G.state.plies || G.state.turn === G.me) {
+      // Розсинхронізація: учень просить стан, вчитель надсилає його.
+      if (d.ply >= G.state.plies) {
+        if (Net.role === 'teacher') sendSetup(); else send('hello', {});
+      }
+      return;
+    }
+    var m = isSq(d.from) && isSq(d.to) ? MC.findMove(G.state, d.from, d.to) : null;
+    if (m) playMove(m, true);
+  }
+
+  /* ================== ПОДІЇ ================== */
+
+  function renderTopButtons() {
+    $('btn-sound').innerHTML = progress.mute ? ICONS.soundOff : ICONS.soundOn;
+    $('btn-sound').setAttribute('aria-label', progress.mute ? 'Увімкнути звук' : 'Вимкнути звук');
+    $('btn-sound').setAttribute('aria-pressed', progress.mute ? 'true' : 'false');
+    $('btn-lock').innerHTML = progress.all ? ICONS.unlock : ICONS.lock;
+  }
+
+  function init() {
+    $('btn-home').innerHTML = ICONS.home;
+    $('btn-speak').innerHTML = ICONS.speak;
+    $('btn-join').innerHTML = ICONS.people + 'Грати з вчителем';
+    $('btn-restart').innerHTML = ICONS.retry + 'Почати знову';
+    $('btn-bear').innerHTML = AVATARS.bear + 'Ведмедик<small>легко</small>';
+    $('btn-fox').innerHTML = AVATARS.fox + 'Лисичка<small>хитро</small>';
+    renderTopButtons();
+    renderMap();
+
+    $('btn-home').addEventListener('click', goHome);
+    $('btn-sound').addEventListener('click', function () {
+      progress.mute = !progress.mute;
+      saveProgress();
+      renderTopButtons();
+      Sound.unlock();
+      Sound.play('select');
+    });
+    $('btn-lock').addEventListener('click', function () { Sound.unlock(); openPin(); });
+    $('pin-cancel').addEventListener('click', function () { hideOverlay('pin'); });
+    buildPad($('pin-pad'), pinDigit, function () { pinValue = pinValue.slice(0, -1); renderPinDots(); });
+
+    $('btn-speak').addEventListener('click', function () { speak($('hint-text').textContent); });
+    if (window.speechSynthesis) {
+      findVoice();
+      if (window.speechSynthesis.addEventListener) window.speechSynthesis.addEventListener('voiceschanged', findVoice);
+    }
+
+    var rb = $('rules-toggle').getElementsByTagName('button');
+    for (var i = 0; i < rb.length; i++) {
+      rb[i].addEventListener('click', function () {
+        intro.real = this.getAttribute('data-real') === '1';
+        renderIntro();
+      });
+    }
+    var tb = $('teacher-rules').getElementsByTagName('button');
+    for (i = 0; i < tb.length; i++) {
+      tb[i].addEventListener('click', function () {
+        teacherPick.real = this.getAttribute('data-real') === '1';
+        renderTeacher();
+      });
+    }
+
+    $('btn-bear').addEventListener('click', function () {
+      Sound.unlock();
+      startGame(intro.level, { mode: 'bot', real: intro.real, opponent: 'bear' });
+    });
+    $('btn-fox').addEventListener('click', function () {
+      Sound.unlock();
+      startGame(intro.level, { mode: 'bot', real: intro.real, opponent: 'fox' });
+    });
+    $('btn-restart').addEventListener('click', function () {
+      if (G.mode === 'online') { if (G.me === 'b') teacherNewGame(); return; }
+      startGame(G.level, { mode: 'bot', real: G.real, opponent: G.opponent });
+    });
+
+    $('btn-join').addEventListener('click', function () { Sound.unlock(); openJoin(); });
+    buildPad($('join-pad'), joinDigit, joinDel);
+
+    $('btn-unlock-all').addEventListener('click', function () {
+      progress.all = !progress.all;
+      saveProgress();
+      renderTopButtons();
+      renderTeacher();
+      renderMap();
+    });
+    $('btn-reset').addEventListener('click', function () {
+      if (!window.confirm('Скинути всі зірочки на цьому пристрої?')) return;
+      var keepMute = progress.mute;
+      progress = blankProgress();
+      progress.mute = keepMute;
+      saveProgress();
+      renderTopButtons();
+      renderTeacher();
+      renderMap();
+    });
+    $('btn-create-room').addEventListener('click', createRoom);
+
+    window.addEventListener('pagehide', netClose);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
