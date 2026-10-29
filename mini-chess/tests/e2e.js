@@ -10,9 +10,12 @@ var assert = require('assert/strict');
 var playwright = require('playwright');
 
 var ORIGIN = 'http://mini-chess.test';
-var HTML = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-var HTML_ONLINE = HTML.replace('var ABLY_KEY = "<КЛЮЧ_ABLY>";', 'var ABLY_KEY = "test.key:for-e2e-only";');
-assert.notEqual(HTML, HTML_ONLINE, 'рядок ABLY_KEY має бути в index.html');
+// Справжній ключ у тестах не використовуємо: офлайн-сценарії — із заглушкою, онлайн — з тестовим.
+var SOURCE = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+var KEY_LINE = /var ABLY_KEY = "[^"]*";/;
+assert.ok(KEY_LINE.test(SOURCE), 'рядок ABLY_KEY має бути в index.html');
+var HTML = SOURCE.replace(KEY_LINE, 'var ABLY_KEY = "<КЛЮЧ_ABLY>";');
+var HTML_ONLINE = SOURCE.replace(KEY_LINE, 'var ABLY_KEY = "test.key:for-e2e-only";');
 
 // Заглушка Ably з тим самим API, що використовує сторінка.
 function fakeAbly() {
