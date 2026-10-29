@@ -795,8 +795,9 @@ var MiniChess = (function () {
 
   /* ================== НАЛАШТУВАННЯ (див. mini-chess/README.md) ================== */
 
-  // Ключ Ably для онлайн-гри з вчителем. Поки тут заглушка, онлайн вимкнено.
-  var ABLY_KEY = "<КЛЮЧ_ABLY>";
+  // Ключ Ably для онлайн-гри з вчителем (лише Publish/Subscribe на каналах mini-chess:*).
+  // Заглушка "<КЛЮЧ_ABLY>" вимикає онлайн.
+  var ABLY_KEY = "HKRVtg.MscH2Q:AW1i-UndGu03DiHJOQ4M4j47m6R_exbbyt2P9GcF95U";
   var ABLY_SRC = 'https://cdn.jsdelivr.net/npm/ably@2.29.0/build/ably.min.js';
   var ABLY_SRI = 'sha384-xVSjbV2fXZTi9caskIhs88kPVeOVfWhVLoNKldOsEkSonNL5mjlfhVIR8pwF012V';
   var ROOM_PREFIX = 'mini-chess:';
